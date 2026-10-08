@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14243A">
+<title>Titulares del mundo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fondo: #EEF2F5;
+    --superficie: #FFFFFF;
+    --tinta: #14243A;
+    --tinta-suave: #56677A;
+    --linea: #D5DDE5;
+    --oceano: #1F6E8C;
+    --senal: #E8B230;
+    --error: #B3261E;
+    --serif: "Newsreader", Georgia, "Times New Roman", serif;
+    --sans: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fondo: #0E1824;
+      --superficie: #15222F;
+      --tinta: #E6EDF3;
+      --tinta-suave: #93A4B5;
+      --linea: #26384A;
+      --oceano: #5FB3D3;
+      --senal: #F0C04F;
+      --error: #F2948C;
+      color-scheme: dark;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--fondo);
+    color: var(--tinta);
+    font: 400 16px/1.5 var(--sans);
+  }
+  :focus-visible { outline: 2px solid var(--oceano); outline-offset: 2px; border-radius: 4px; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+
+  /* ---------- cabecera ---------- */
+  .cabecera {
+    position: sticky; top: 0; z-index: 5;
+    background: var(--fondo);
+    border-bottom: 1px solid var(--linea);
+    padding: calc(12px + env(safe-area-inset-top)) 16px 0;
+  }
+  .barra {
+    max-width: 760px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  h1 {
+    margin: 0;
+    font: 600 1.5rem/1.1 var(--serif);
+    letter-spacing: -0.01em;
+  }
+  .contador { margin: 2px 0 0; font-size: .8125rem; color: var(--tinta-suave); }
+  .btn-actualizar {
+    flex-shrink: 0;
+    border: 1px solid var(--linea); background: var(--superficie);
+    padding: 8px 14px; border-radius: 999px; font-size: .875rem; font-weight: 500;
+  }
+  .btn-actualizar[disabled] { opacity: .6; cursor: progress; }
+
+  /* ---------- selector de alcance: la distancia como eje ---------- */
+  .alcance {
+    max-width: 760px; margin: 14px auto 0 -10px;
+    display: flex; gap: 0; overflow-x: auto; scrollbar-width: none;
+  }
+  .alcance::-webkit-scrollbar { display: none; }
+  .alcance button {
+    background: none; border: 0; padding: 8px 10px 12px;
+    display: flex; align-items: center; gap: 6px;
+    font-size: .9375rem; font-weight: 500; color: var(--tinta-suave);
+    white-space: nowrap; position: relative;
+  }
+  .alcance button::after {
+    content: ""; position: absolute; left: 10px; right: 10px; bottom: -1px;
+    height: 3px; border-radius: 3px 3px 0 0; background: transparent;
+  }
+  .alcance button[aria-pressed="true"] { color: var(--tinta); }
+  .alcance button[aria-pressed="true"]::after { background: var(--senal); }
+  /* anillos que crecen con la distancia */
+  .anillo {
+    width: 14px; height: 14px; border-radius: 50%;
+    display: inline-grid; place-items: center; flex-shrink: 0;
+  }
+  .anillo i { display: block; border-radius: 50%; border: 1.5px solid currentColor; }
+  .d1 i { width: 5px; height: 5px; background: currentColor; }
+  .d2 i { width: 9px; height: 9px; }
+  .d3 i { width: 14px; height: 14px; }
+  .alcance button[aria-pressed="true"] .anillo { color: var(--oceano); }
+
+  /* ---------- filtros secundarios ---------- */
+  .filtros {
+    max-width: 760px; margin: 0 auto; padding: 12px 16px 0;
+  }
+  .buscador {
+    width: 100%; padding: 10px 14px; border-radius: 10px;
+    border: 1px solid var(--linea); background: var(--superficie); color: var(--tinta);
+    font: inherit; font-size: 1rem;
+  }
+  .buscador::placeholder { color: var(--tinta-suave); }
+  .paises {
+    display: flex; gap: 6px; overflow-x: auto; padding: 10px 0 2px;
+    scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, #000 92%, transparent);
+  }
+  .paises::-webkit-scrollbar { display: none; }
+  .paises button {
+    flex-shrink: 0; border: 1px solid var(--linea); background: var(--superficie);
+    border-radius: 999px; padding: 4px 10px; font-size: .8125rem;
+    display: inline-flex; gap: 5px; align-items: center;
+  }
+  .paises button span { color: var(--tinta-suave); font-variant-numeric: tabular-nums; }
+  .paises button[aria-pressed="true"] {
+    background: var(--tinta); color: var(--fondo); border-color: var(--tinta);
+  }
+  .paises button[aria-pressed="true"] span { color: inherit; opacity: .7; }
+
+  /* ---------- lista de titulares ---------- */
+  main { max-width: 760px; margin: 0 auto; padding: 4px 16px 48px; }
+  .lista { list-style: none; margin: 0; padding: 0; }
+  .nota { border-bottom: 1px solid var(--linea); }
+  .nota a {
+    display: grid; grid-template-columns: 1fr auto; gap: 14px;
+    padding: 16px 0; color: inherit; text-decoration: none;
+  }
+  .nota a:hover .titular { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  .meta {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px;
+    font-size: .8125rem; color: var(--tinta-suave); margin-bottom: 4px;
+  }
+  .meta .medio { color: var(--tinta); font-weight: 600; }
+  .bandera { font-size: 1rem; line-height: 1; }
+  .idioma {
+    border: 1px solid var(--linea); border-radius: 4px; padding: 0 4px;
+    font-size: .6875rem; font-weight: 600; letter-spacing: .02em;
+  }
+  .titular {
+    margin: 0; font: 600 1.1875rem/1.28 var(--serif);
+    letter-spacing: -0.005em; overflow-wrap: anywhere;
+  }
+  .resumen {
+    margin: 6px 0 0; font-size: .875rem; color: var(--tinta-suave);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .foto {
+    width: 92px; height: 92px; border-radius: 8px; object-fit: cover;
+    background: var(--linea); align-self: start;
+  }
+  @media (min-width: 800px) { .alcance { margin-left: auto; } }
+  @media (min-width: 640px) {
+    .foto { width: 148px; height: 104px; }
+    .titular { font-size: 1.3125rem; }
+  }
+
+  /* ---------- estados ---------- */
+  .aviso {
+    text-align: center; color: var(--tinta-suave); padding: 48px 8px; max-width: 46ch; margin: 0 auto;
+  }
+  .aviso strong { display: block; color: var(--tinta); font: 600 1.125rem/1.3 var(--serif); margin-bottom: 4px; }
+  .aviso.error strong { color: var(--error); }
+  .cargando { text-align: center; padding: 20px; color: var(--tinta-suave); font-size: .875rem; }
+  .toast {
+    position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom));
+    transform: translate(-50%, 16px); opacity: 0;
+    background: var(--tinta); color: var(--fondo);
+    padding: 10px 16px; border-radius: 10px; font-size: .9375rem;
+    transition: opacity .2s, transform .2s; pointer-events: none; max-width: calc(100% - 32px);
+  }
+  .toast.visible { opacity: 1; transform: translate(-50%, 0); }
+  @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+</style>
+</head>
+<body>
+
+<header class="cabecera">
+  <div class="barra">
+    <div>
+      <h1>Titulares del mundo</h1>
+      <p class="contador" id="contador">&nbsp;</p>
+    </div>
+    <button class="btn-actualizar" id="btnActualizar" type="button">Actualizar</button>
+  </div>
+  <nav class="alcance" id="alcance" aria-label="Alcance de las noticias">
+    <button type="button" data-alcance="todo" aria-pressed="true">Todo</button>
+    <button type="button" data-alcance="cerca" aria-pressed="false"><span class="anillo d1"><i></i></span>Cerca</button>
+    <button type="button" data-alcance="region" aria-pressed="false"><span class="anillo d2"><i></i></span>Región</button>
+    <button type="button" data-alcance="mundo" aria-pressed="false"><span class="anillo d3"><i></i></span>Mundo</button>
+    <button type="button" data-alcance="deportes" aria-pressed="false">Deportes</button>
+  </nav>
+</header>
+
+<div class="filtros">
+  <input class="buscador" id="buscador" type="search" placeholder="Buscar en los titulares" aria-label="Buscar en los titulares" autocomplete="off">
+  <div class="paises" id="paises" role="group" aria-label="Filtrar por país"></div>
+</div>
+
+<main>
+  <ul class="lista" id="lista" aria-live="polite"></ul>
+  <div id="estado"></div>
+  <div id="centinela" aria-hidden="true"></div>
+</main>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const NOMBRES_PAIS = {
+  AR:"Argentina", AU:"Australia", BR:"Brasil", CA:"Canadá", CL:"Chile", DE:"Alemania", ES:"España",
+  FR:"Francia", GB:"Reino Unido", HK:"Hong Kong", IN:"India", INT:"Varios", IT:"Italia", JP:"Japón",
+  MX:"México", NG:"Nigeria", NZ:"Nueva Zelanda", QA:"Catar", US:"Estados Unidos", UY:"Uruguay", ZA:"Sudáfrica"
+};
+const nombrePais = c => NOMBRES_PAIS[c] || c;
+const bandera = c => (!c || c.length !== 2) ? "🌐"
+  : String.fromCodePoint(...[...c.toUpperCase()].map(l => 0x1F1E6 + l.charCodeAt(0) - 65));
+// quita tildes y pasa a minúsculas: "Política" y "politica" encuentran lo mismo
+const normalizar = s => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
+const POR_PAGINA = 30;
+const datos = { fuentes: [], articulos: [], paisLocal: "AR", regionLocal: "", generado: null, local: false };
+const estado = { alcance: "todo", pais: "", q: "", filtrados: [], mostrados: 0 };
+const $ = id => document.getElementById(id);
+
+function haceCuanto(iso) {
+  const fecha = new Date(iso);
+  const min = Math.round((Date.now() - fecha) / 60000);
+  if (min < 1) return "recién";
+  if (min < 60) return `hace ${min} min`;
+  const h = Math.round(min / 60);
+  if (h < 24) return `hace ${h} h`;
+  if (h < 48) return "ayer";
+  return fecha.toLocaleDateString("es-AR", { day: "numeric", month: "short" });
+}
+
+// ---------- datos ----------
+async function cargarDatos() {
+  const r = await fetch(`noticias.json?v=${Date.now()}`, { cache: "no-store" });
+  if (!r.ok) throw new Error(r.status === 404
+    ? "Todavía no hay noticias publicadas. La primera actualización puede tardar unos minutos."
+    : `El servidor respondió con error ${r.status}.`);
+  const j = await r.json();
+  datos.fuentes = j.fuentes;
+  datos.paisLocal = j.pais_local || "AR";
+  datos.generado = j.generado;
+  datos.local = !!j.local;
+  datos.regionLocal = (j.fuentes.find(f => f.pais === datos.paisLocal) || {}).region || "";
+  datos.articulos = j.articulos.map(a => ({ ...a, fuente: j.fuentes[a.f], busq: normalizar(`${a.t} ${a.r || ""}`) }));
+  $("btnActualizar").textContent = datos.local ? "Buscar nuevas" : "Actualizar";
+}
+
+function enAlcance(a, alcance = estado.alcance) {
+  const f = a.fuente;
+  switch (alcance) {
+    case "cerca":    return f.categoria === "general" && f.pais === datos.paisLocal;
+    case "region":   return f.categoria === "general" && f.region === datos.regionLocal && f.pais !== datos.paisLocal;
+    case "mundo":    return f.categoria === "general" && f.region !== datos.regionLocal;
+    case "deportes": return f.categoria === "deportes";
+    default:         return true;
+  }
+}
+
+// ---------- pantalla ----------
+function crearNota(n) {
+  const li = document.createElement("li");
+  li.className = "nota";
+  const a = document.createElement("a");
+  a.href = n.u; a.target = "_blank"; a.rel = "noopener noreferrer";
+
+  const texto = document.createElement("div");
+  const meta = document.createElement("div");
+  meta.className = "meta";
+  const bnd = document.createElement("span");
+  bnd.className = "bandera"; bnd.textContent = bandera(n.fuente.pais);
+  bnd.title = nombrePais(n.fuente.pais); bnd.setAttribute("aria-label", bnd.title);
+  const medio = document.createElement("span");
+  medio.className = "medio"; medio.textContent = n.fuente.nombre;
+  const t = document.createElement("time");
+  t.dateTime = n.p; t.textContent = haceCuanto(n.p);
+  t.title = new Date(n.p).toLocaleString("es-AR");
+  meta.append(bnd, medio, t);
+  if (n.fuente.idioma && n.fuente.idioma !== "es") {
+    const idi = document.createElement("span");
+    idi.className = "idioma"; idi.textContent = n.fuente.idioma.toUpperCase();
+    idi.title = "Idioma del artículo";
+    meta.appendChild(idi);
+  }
+
+  const h = document.createElement("h2");
+  h.className = "titular"; h.textContent = n.t;
+  texto.append(meta, h);
+  if (n.r) {
+    const p = document.createElement("p");
+    p.className = "resumen"; p.textContent = n.r;
+    texto.appendChild(p);
+  }
+  a.appendChild(texto);
+
+  if (n.i) {
+    const img = document.createElement("img");
+    img.className = "foto"; img.src = n.i; img.alt = "";
+    img.loading = "lazy"; img.decoding = "async"; img.referrerPolicy = "no-referrer";
+    img.onerror = () => img.remove();
+    a.appendChild(img);
+  }
+  li.appendChild(a);
+  return li;
+}
+
+function mostrarEstado(html, clase = "aviso") {
+  $("estado").innerHTML = html ? `<div class="${clase}">${html}</div>` : "";
+}
+
+function mostrarMas() {
+  const lote = estado.filtrados.slice(estado.mostrados, estado.mostrados + POR_PAGINA);
+  lote.forEach(n => $("lista").appendChild(crearNota(n)));
+  estado.mostrados += lote.length;
+  if (!estado.filtrados.length) {
+    const q = estado.q.replace(/[<>&]/g, "");
+    mostrarEstado(q
+      ? `<strong>Sin resultados para “${q}”</strong>Probá con otra palabra o elegí “Todo”.`
+      : `<strong>No hay noticias en esta sección</strong>Tocá “${$("btnActualizar").textContent}” para traer las últimas.`);
+  } else {
+    mostrarEstado(estado.mostrados >= estado.filtrados.length ? "Llegaste al final." : "", "cargando");
+  }
+  requestAnimationFrame(revisarFinal);
+}
+
+// si el final de la lista ya está a la vista, seguir cargando
+function revisarFinal() {
+  const cerca = $("centinela").getBoundingClientRect().top < innerHeight + 600;
+  if (cerca && estado.mostrados < estado.filtrados.length) mostrarMas();
+}
+
+function aplicarFiltros() {
+  const q = normalizar(estado.q);
+  estado.filtrados = datos.articulos.filter(a =>
+    enAlcance(a) && (!estado.pais || a.fuente.pais === estado.pais) && (!q || a.busq.includes(q)));
+  estado.mostrados = 0;
+  $("lista").innerHTML = "";
+  mostrarMas();
+}
+
+function dibujarPaises() {
+  const conteo = {};
+  datos.articulos.forEach(a => { if (enAlcance(a)) conteo[a.fuente.pais] = (conteo[a.fuente.pais] || 0) + 1; });
+  const paises = Object.entries(conteo).sort((x, y) => y[1] - x[1]);
+  const cont = $("paises");
+  cont.innerHTML = "";
+  cont.hidden = paises.length < 2;
+  if (cont.hidden) return;
+  [["", null], ...paises].forEach(([pais, cantidad]) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.setAttribute("aria-pressed", String(pais === estado.pais));
+    b.textContent = pais ? `${bandera(pais)} ${nombrePais(pais)}` : "Todos los países";
+    if (cantidad !== null) {
+      const s = document.createElement("span"); s.textContent = cantidad; b.appendChild(s);
+    }
+    b.onclick = () => { estado.pais = pais; dibujarPaises(); aplicarFiltros(); };
+    cont.appendChild(b);
+  });
+}
+
+function dibujarContador() {
+  const n = datos.articulos.length.toLocaleString("es-AR");
+  $("contador").textContent = datos.generado
+    ? `${n} noticias, actualizado ${haceCuanto(datos.generado)}`
+    : `${n} noticias`;
+}
+
+function redibujarTodo() { dibujarContador(); dibujarPaises(); aplicarFiltros(); }
+
+async function iniciar() {
+  mostrarEstado("Cargando…", "cargando");
+  try {
+    await cargarDatos();
+    redibujarTodo();
+  } catch (e) {
+    mostrarEstado(`<strong>No se pudieron cargar las noticias</strong>${e.message}`, "aviso error");
+  }
+}
+
+// ---------- eventos ----------
+$("alcance").addEventListener("click", ev => {
+  const b = ev.target.closest("button");
+  if (!b) return;
+  document.querySelectorAll("#alcance button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  estado.alcance = b.dataset.alcance;
+  estado.pais = "";
+  dibujarPaises();
+  aplicarFiltros();
+});
+
+let espera;
+$("buscador").addEventListener("input", ev => {
+  clearTimeout(espera);
+  espera = setTimeout(() => { estado.q = ev.target.value.trim(); aplicarFiltros(); }, 200);
+});
+
+function avisar(texto) {
+  const t = $("toast");
+  t.textContent = texto; t.classList.add("visible");
+  clearTimeout(avisar.t); avisar.t = setTimeout(() => t.classList.remove("visible"), 3500);
+}
+
+$("btnActualizar").addEventListener("click", async () => {
+  const b = $("btnActualizar");
+  const etiqueta = b.textContent;
+  b.disabled = true; b.textContent = datos.local ? "Buscando…" : "Actualizando…";
+  try {
+    const antes = datos.articulos.length ? datos.articulos[0].p : "";
+    if (datos.local) {
+      const r = await fetch("/api/recolectar", { method: "POST" }).then(x => x.json());
+      if (!r.ok) throw new Error(r.mensaje);
+    }
+    await cargarDatos();
+    const nuevas = datos.articulos.filter(a => a.p > antes).length;
+    redibujarTodo();
+    avisar(nuevas ? `${nuevas} noticias nuevas` : "No hay noticias nuevas por ahora");
+  } catch (e) {
+    avisar(e.message || "No se pudo actualizar");
+  } finally {
+    b.disabled = false; b.textContent = datos.local ? "Buscar nuevas" : "Actualizar";
+    if (!b.textContent) b.textContent = etiqueta;
+  }
+});
+
+// carga más notas al llegar al final de la lista
+new IntersectionObserver(entradas => {
+  if (entradas[0].isIntersecting && estado.mostrados < estado.filtrados.length) mostrarMas();
+}, { rootMargin: "600px" }).observe($("centinela"));
+
+iniciar();
+</script>
+</body>
+</html>

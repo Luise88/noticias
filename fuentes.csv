@@ -1,0 +1,56 @@
+nombre,url_rss,pais,region,idioma,categoria,activa
+La Gazzetta dello Sport,https://www.gazzetta.it/rss/home.xml,IT,Europa,it,deportes,1
+ESPN Deportes,https://espndeportes.espn.com/espn/rss/news,US,Norteamérica,es,deportes,1
+ESPN USA,https://www.espn.com/espn/rss/news,US,Norteamérica,en,deportes,1
+MLB,https://www.mlb.com/feeds/news/rss.xml,US,Norteamérica,en,deportes,1
+NBA (sitio oficial),https://www.nba.com/,US,Norteamérica,en,deportes,0
+NBA (vía ESPN),https://www.espn.com/espn/rss/nba/news,US,Norteamérica,en,deportes,1
+NFL (sitio oficial),https://www.nfl.com/,US,Norteamérica,en,deportes,0
+NFL (vía ESPN),https://www.espn.com/espn/rss/nfl/news,US,Norteamérica,en,deportes,1
+Sports Illustrated,https://www.si.com/feed,US,Norteamérica,en,deportes,1
+ESPN Argentina,https://www.espn.com.ar/,AR,Sudamérica,es,deportes,0
+Olé,https://www.ole.com.ar/rss/ultimas-noticias/,AR,Sudamérica,es,deportes,1
+TyC Sports,https://www.tycsports.com/,AR,Sudamérica,es,deportes,0
+South China Morning Post,https://www.scmp.com/rss/91/feed,HK,Asia,en,general,1
+The Hindu Internacional,https://www.thehindu.com/news/international/feeder/default.rss,IN,Asia,en,general,1
+Times of India,https://timesofindia.indiatimes.com/rssfeedstopstories.cms,IN,Asia,en,general,1
+The Japan Times,https://www.japantimes.co.jp/feed/,JP,Asia,en,general,1
+DW Español,https://rss.dw.com/rdf/rss-sp-all,DE,Europa,es,general,1
+Der Spiegel,https://www.spiegel.de/schlagzeilen/index.rss,DE,Europa,de,general,1
+Frankfurter Allgemeine,https://www.faz.net/rss/aktuell/,DE,Europa,de,general,1
+El País,https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada,ES,Europa,es,general,1
+France 24 Español,https://www.france24.com/es/rss,FR,Europa,es,general,1
+Le Figaro (París),https://www.lefigaro.fr/rss/figaro_actualites.xml,FR,Europa,fr,general,1
+Le Monde (París),https://www.lemonde.fr/rss/une.xml,FR,Europa,fr,general,1
+BBC Mundo,https://feeds.bbci.co.uk/mundo/rss.xml,GB,Europa,es,general,1
+BBC World,https://feeds.bbci.co.uk/news/world/rss.xml,GB,Europa,en,general,1
+Evening Standard (Londres),https://www.standard.co.uk/rss,GB,Europa,en,general,1
+The Guardian World,https://www.theguardian.com/world/rss,GB,Europa,en,general,1
+ANSA (Roma),https://www.ansa.it/sito/notizie/topnews/topnews_rss.xml,IT,Europa,it,general,1
+Il Messaggero (Roma),https://www.ilmessaggero.it/rss/home.xml,IT,Europa,it,general,1
+La Repubblica,https://www.repubblica.it/rss/homepage/rss2.0.xml,IT,Europa,it,general,0
+Al Jazeera,https://www.aljazeera.com/xml/rss/all.xml,QA,Medio Oriente,en,general,1
+CBC World,https://www.cbc.ca/webfeed/rss/rss-world,CA,Norteamérica,en,general,1
+El Universal (México),https://www.eluniversal.com.mx/arc/outboundfeeds/rss/?outputType=xml,MX,Norteamérica,es,general,1
+La Jornada (México),https://www.jornada.com.mx/rss/edicion.xml,MX,Norteamérica,es,general,1
+LA Daily News,https://www.dailynews.com/feed/,US,Norteamérica,en,general,0
+LAist (Los Ángeles),https://laist.com/index.atom,US,Norteamérica,en,general,1
+Los Angeles Times,https://www.latimes.com/local/rss2.0.xml,US,Norteamérica,en,general,1
+NPR,https://feeds.npr.org/1001/rss.xml,US,Norteamérica,en,general,1
+New York Post,https://nypost.com/feed/,US,Norteamérica,en,general,1
+New York Times,https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml,US,Norteamérica,en,general,1
+Washington Post,https://feeds.washingtonpost.com/rss/national,US,Norteamérica,en,general,1
+Washington Times,https://www.washingtontimes.com/rss/headlines/news/,US,Norteamérica,en,general,1
+ABC News Australia,https://www.abc.net.au/news/feed/51120/rss.xml,AU,Oceanía,en,general,1
+RNZ World,https://www.rnz.co.nz/rss/world.xml,NZ,Oceanía,en,general,1
+Clarín,https://www.clarin.com/rss/lo-ultimo/,AR,Sudamérica,es,general,1
+Infobae,https://www.infobae.com/arc/outboundfeeds/rss/,AR,Sudamérica,es,general,1
+La Nación,https://www.lanacion.com.ar/arc/outboundfeeds/rss/?outputType=xml,AR,Sudamérica,es,general,1
+Ámbito,https://www.ambito.com/rss/pages/home.xml,AR,Sudamérica,es,general,1
+Folha de S.Paulo,https://feeds.folha.uol.com.br/emcimadahora/rss091.xml,BR,Sudamérica,pt,general,1
+Cooperativa (Chile),https://www.cooperativa.cl/noticias/site/tax/port/all/rss_3___1.xml,CL,Sudamérica,es,general,1
+MercoPress,https://en.mercopress.com/rss,UY,Sudamérica,en,general,0
+la diaria (Uruguay),https://ladiaria.com.uy/feeds/articulos/,UY,Sudamérica,es,general,1
+AllAfrica,https://allafrica.com/tools/headlines/rdf/latest/headlines.rdf,INT,África,en,general,1
+Premium Times,https://www.premiumtimesng.com/feed,NG,África,en,general,1
+News24,https://www.news24.com/,ZA,África,en,general,0
