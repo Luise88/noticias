@@ -16,6 +16,7 @@ como "memoria" entre una corrida y la siguiente.
 import argparse
 import hashlib
 import json
+import shutil
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -26,6 +27,10 @@ PAIS_LOCAL = "AR"      # tu país: define qué es "Cerca" en la pantalla
 DIAS = 3               # cuántos días de noticias se publican
 MAXIMO = 4000          # tope de artículos en el archivo (para que cargue rápido en el celular)
 LARGO_RESUMEN = 200    # caracteres de resumen que se publican
+
+# archivos de la página que se publican junto a noticias.json
+ARCHIVOS_WEB = ["index.html", "manifest.json", "sw.js",
+                "icono-192.png", "icono-512.png", "icono-maskable.png", "icono-apple.png"]
 
 
 def exportar(con, local: bool = False) -> dict:
@@ -119,6 +124,9 @@ def main() -> None:
         datos = exportar(con)
         args.salida.parent.mkdir(parents=True, exist_ok=True)
         args.salida.write_text(json.dumps(datos, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        for nombre in ARCHIVOS_WEB:          # copia la pantalla, el ícono, etc.
+            if (rec.BASE / nombre).exists():
+                shutil.copy2(rec.BASE / nombre, args.salida.parent / nombre)
         tam = args.salida.stat().st_size / 1024
         print(f"Exportadas {len(datos['articulos'])} noticias de {len(datos['fuentes'])} medios "
               f"a {args.salida} ({tam:,.0f} KB)")

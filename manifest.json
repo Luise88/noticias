@@ -1,0 +1,16 @@
+{
+  "name": "Titulares del mundo",
+  "short_name": "Titulares",
+  "description": "Noticias de medios de todo el mundo, sin algoritmo que elija por vos.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#EEF2F5",
+  "theme_color": "#14243A",
+  "icons": [
+    { "src": "icono-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icono-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icono-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

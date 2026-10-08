@@ -17,6 +17,7 @@ import sqlite3
 import subprocess
 import sys
 import threading
+import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlsplit
 
@@ -25,7 +26,8 @@ import recolector as rec
 
 PUERTO = 8000
 ARCHIVO_DB = rec.BASE / "noticias.db"
-ARCHIVO_HTML = rec.BASE / "index.html"
+TIPOS = {"html": "text/html; charset=utf-8", "json": "application/manifest+json",
+         "js": "text/javascript; charset=utf-8", "png": "image/png"}
 candado_recoleccion = threading.Lock()
 
 
@@ -63,8 +65,9 @@ class Manejador(BaseHTTPRequestHandler):
     def do_GET(self) -> None:  # noqa: N802
         ruta = urlsplit(self.path).path
         try:
-            if ruta in ("/", "/index.html"):
-                self._responder(200, ARCHIVO_HTML.read_bytes(), "text/html; charset=utf-8")
+            nombre = ruta.lstrip("/") or "index.html"
+            if nombre in exportar.ARCHIVOS_WEB and (rec.BASE / nombre).exists():
+                self._responder(200, (rec.BASE / nombre).read_bytes(), TIPOS.get(nombre.rsplit(".", 1)[-1], "application/octet-stream"))
             elif ruta == "/noticias.json":
                 con = rec.abrir_db(ARCHIVO_DB)
                 try:
@@ -103,12 +106,20 @@ def main() -> None:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
     if not ARCHIVO_DB.exists():
-        sys.exit("No encuentro noticias.db. Corré primero:  py recolector.py")
-    servidor = ThreadingHTTPServer(("0.0.0.0", PUERTO), Manejador)
+        print("No encuentro noticias.db: busco las primeras noticias (tarda un par de minutos)...")
+        subprocess.run([sys.executable, str(rec.BASE / "recolector.py")], cwd=rec.BASE)
+    try:
+        servidor = ThreadingHTTPServer(("0.0.0.0", PUERTO), Manejador)
+    except OSError:
+        print(f"El puerto {PUERTO} ya está en uso: probablemente el servidor ya está abierto en otra ventana.")
+        print("Cerrá esa ventana (o Ctrl + C en ella) y volvé a intentar.")
+        sys.exit(1)
     print("Servidor de noticias funcionando.\n")
     print(f"  En esta computadora:  http://localhost:{PUERTO}")
     print(f"  En el celular (mismo WiFi):  http://{ip_local()}:{PUERTO}\n")
-    print("Para apagarlo: Ctrl + C")
+    print("Para apagarlo: Ctrl + C (o cerrá esta ventana)")
+    if "--sin-navegador" not in sys.argv:   # abre la página sola en el navegador
+        threading.Timer(1.0, webbrowser.open, [f"http://localhost:{PUERTO}"]).start()
     try:
         servidor.serve_forever()
     except KeyboardInterrupt:

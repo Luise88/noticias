@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#14243A">
+<meta name="description" content="Noticias de medios de todo el mundo, sin algoritmo que elija por vos.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icono-192.png">
+<link rel="apple-touch-icon" href="icono-apple.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Titulares">
 <title>Titulares del mundo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -226,7 +232,8 @@ const bandera = c => (!c || c.length !== 2) ? "🌐"
 const normalizar = s => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
 const POR_PAGINA = 30;
-const datos = { fuentes: [], articulos: [], paisLocal: "AR", regionLocal: "", generado: null, local: false };
+const datos = { fuentes: [], articulos: [], paisLocal: "AR", regionLocal: "", generado: null, local: false, error: "" };
+const EN_NOTEBOOK = ["localhost", "127.0.0.1"].includes(location.hostname) || /^192\.168\.|^10\./.test(location.hostname);
 const estado = { alcance: "todo", pais: "", q: "", filtrados: [], mostrados: 0 };
 const $ = id => document.getElementById(id);
 
@@ -243,9 +250,18 @@ function haceCuanto(iso) {
 
 // ---------- datos ----------
 async function cargarDatos() {
-  const r = await fetch(`noticias.json?v=${Date.now()}`, { cache: "no-store" });
+  let r;
+  try {
+    r = await fetch(`noticias.json?v=${Date.now()}`, { cache: "no-store" });
+  } catch {
+    throw new Error(EN_NOTEBOOK
+      ? "El servidor está apagado. Abrí “Abrir noticias” en la carpeta AppNoticias (o corré py servidor.py) y recargá la página."
+      : "Sin conexión. Revisá internet y tocá Actualizar.");
+  }
   if (!r.ok) throw new Error(r.status === 404
-    ? "Todavía no hay noticias publicadas. La primera actualización puede tardar unos minutos."
+    ? (EN_NOTEBOOK
+        ? "El servidor que está abierto es una versión anterior. Cerrá la ventana de PowerShell del servidor (o Ctrl + C), volvé a abrirlo y recargá la página."
+        : "Todavía no hay noticias publicadas. La primera actualización puede tardar unos minutos.")
     : `El servidor respondió con error ${r.status}.`);
   const j = await r.json();
   datos.fuentes = j.fuentes;
@@ -253,6 +269,7 @@ async function cargarDatos() {
   datos.generado = j.generado;
   datos.local = !!j.local;
   datos.regionLocal = (j.fuentes.find(f => f.pais === datos.paisLocal) || {}).region || "";
+  datos.error = "";
   datos.articulos = j.articulos.map(a => ({ ...a, fuente: j.fuentes[a.f], busq: normalizar(`${a.t} ${a.r || ""}`) }));
   $("btnActualizar").textContent = datos.local ? "Buscar nuevas" : "Actualizar";
 }
@@ -320,6 +337,10 @@ function mostrarEstado(html, clase = "aviso") {
 }
 
 function mostrarMas() {
+  if (datos.error) {          // si no se pudieron cargar los datos, seguir mostrando el motivo
+    mostrarEstado(`<strong>No se pudieron cargar las noticias</strong>${datos.error}`, "aviso error");
+    return;
+  }
   const lote = estado.filtrados.slice(estado.mostrados, estado.mostrados + POR_PAGINA);
   lote.forEach(n => $("lista").appendChild(crearNota(n)));
   estado.mostrados += lote.length;
@@ -371,6 +392,7 @@ function dibujarPaises() {
 }
 
 function dibujarContador() {
+  if (datos.error) { $("contador").textContent = ""; return; }
   const n = datos.articulos.length.toLocaleString("es-AR");
   $("contador").textContent = datos.generado
     ? `${n} noticias, actualizado ${haceCuanto(datos.generado)}`
@@ -385,7 +407,8 @@ async function iniciar() {
     await cargarDatos();
     redibujarTodo();
   } catch (e) {
-    mostrarEstado(`<strong>No se pudieron cargar las noticias</strong>${e.message}`, "aviso error");
+    datos.error = e.message;
+    mostrarMas();
   }
 }
 
@@ -422,7 +445,7 @@ $("btnActualizar").addEventListener("click", async () => {
       const r = await fetch("/api/recolectar", { method: "POST" }).then(x => x.json());
       if (!r.ok) throw new Error(r.mensaje);
     }
-    await cargarDatos();
+    try { await cargarDatos(); } catch (e) { datos.error = e.message; redibujarTodo(); throw e; }
     const nuevas = datos.articulos.filter(a => a.p > antes).length;
     redibujarTodo();
     avisar(nuevas ? `${nuevas} noticias nuevas` : "No hay noticias nuevas por ahora");
@@ -440,6 +463,11 @@ new IntersectionObserver(entradas => {
 }, { rootMargin: "600px" }).observe($("centinela"));
 
 iniciar();
+
+// permite instalar la app y abrirla sin conexión (solo en la versión publicada, con https)
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
 </script>
 </body>
 </html>
