@@ -42,6 +42,9 @@ def recolectar() -> dict:
         m = re.search(r"Artículos nuevos guardados: (\d+)", r.stdout)
         if r.returncode != 0 or not m:
             return {"ok": False, "mensaje": "El recolector falló. Corré 'py recolector.py' para ver el error."}
+        # traducir lo nuevo (si el traductor no responde, se sigue sin traducción)
+        subprocess.run([sys.executable, str(rec.BASE / "traductor.py")], cwd=rec.BASE,
+                       capture_output=True, timeout=600)
         return {"ok": True, "nuevos": int(m.group(1))}
     except subprocess.TimeoutExpired:
         return {"ok": False, "mensaje": "La búsqueda tardó más de 10 minutos y se canceló"}

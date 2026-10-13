@@ -11,6 +11,12 @@ Sports Illustrated,https://www.si.com/feed,US,Norteamérica,en,deportes,1
 ESPN Argentina,https://www.espn.com.ar/,AR,Sudamérica,es,deportes,0
 Olé,https://www.ole.com.ar/rss/ultimas-noticias/,AR,Sudamérica,es,deportes,1
 TyC Sports,https://www.tycsports.com/,AR,Sudamérica,es,deportes,0
+Deadline,https://deadline.com/feed/,US,Norteamérica,en,espectaculos,1
+Entertainment Weekly,https://ew.com/feed/,US,Norteamérica,en,espectaculos,1
+IndieWire,https://www.indiewire.com/feed/,US,Norteamérica,en,espectaculos,1
+TVLine,https://tvline.com/feed/,US,Norteamérica,en,espectaculos,1
+The Hollywood Reporter,https://www.hollywoodreporter.com/feed/,US,Norteamérica,en,espectaculos,1
+Variety,https://variety.com/feed/,US,Norteamérica,en,espectaculos,1
 South China Morning Post,https://www.scmp.com/rss/91/feed,HK,Asia,en,general,1
 The Hindu Internacional,https://www.thehindu.com/news/international/feeder/default.rss,IN,Asia,en,general,1
 Times of India,https://timesofindia.indiatimes.com/rssfeedstopstories.cms,IN,Asia,en,general,1
@@ -44,7 +50,7 @@ Washington Times,https://www.washingtontimes.com/rss/headlines/news/,US,Norteam�
 ABC News Australia,https://www.abc.net.au/news/feed/51120/rss.xml,AU,Oceanía,en,general,1
 RNZ World,https://www.rnz.co.nz/rss/world.xml,NZ,Oceanía,en,general,1
 Clarín,https://www.clarin.com/rss/lo-ultimo/,AR,Sudamérica,es,general,1
-Infobae,https://www.infobae.com/arc/outboundfeeds/rss/,AR,Sudamérica,es,general,1
+Infobae América,https://www.infobae.com/arc/outboundfeeds/rss/category/america/,AR,Sudamérica,es,general,1
 La Nación,https://www.lanacion.com.ar/arc/outboundfeeds/rss/?outputType=xml,AR,Sudamérica,es,general,1
 Ámbito,https://www.ambito.com/rss/pages/home.xml,AR,Sudamérica,es,general,1
 Folha de S.Paulo,https://feeds.folha.uol.com.br/emcimadahora/rss091.xml,BR,Sudamérica,pt,general,1

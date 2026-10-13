@@ -22,6 +22,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import recolector as rec
+import traductor
 
 PAIS_LOCAL = "AR"      # tu país: define qué es "Cerca" en la pantalla
 DIAS = 3               # cuántos días de noticias se publican
@@ -35,9 +36,11 @@ ARCHIVOS_WEB = ["index.html", "manifest.json", "sw.js",
 
 def exportar(con, local: bool = False) -> dict:
     """Arma el contenido de noticias.json a partir de la base de datos."""
+    traductor.preparar_db(con)
     desde = (datetime.now(timezone.utc) - timedelta(days=DIAS)).isoformat()
     filas = con.execute("""
-        SELECT a.titulo, a.resumen, a.url, a.imagen, a.publicado_utc, a.fuente_id
+        SELECT a.titulo, a.resumen, a.url, a.imagen, a.publicado_utc, a.fuente_id,
+               a.titulo_tr, a.resumen_tr, a.idioma_tr
         FROM articulos a JOIN fuentes f ON f.id = a.fuente_id
         WHERE a.publicado_utc >= ?
         ORDER BY a.publicado_utc DESC, a.id DESC
@@ -64,6 +67,11 @@ def exportar(con, local: bool = False) -> dict:
             art["r"] = resumen
         if f["imagen"]:
             art["i"] = f["imagen"]
+        if f["titulo_tr"]:                      # traducción (ver traductor.py)
+            art["tt"] = f["titulo_tr"]
+            if f["resumen_tr"] and "r" in art:
+                art["tr"] = f["resumen_tr"]
+            art["il"] = f["idioma_tr"]
         articulos.append(art)
 
     return {
@@ -84,6 +92,7 @@ def importar(con, datos: dict) -> int:
                     (f["nombre"], f.get("pais"), f.get("region"), f.get("idioma"), f.get("categoria", "general")))
         ids[i] = con.execute("SELECT id FROM fuentes WHERE nombre = ?", (f["nombre"],)).fetchone()[0]
 
+    traductor.preparar_db(con)
     cargados = 0
     generado = datos.get("generado") or rec.ahora_utc()
     for a in datos.get("articulos", []):
@@ -96,6 +105,11 @@ def importar(con, datos: dict) -> int:
         """, (hashlib.sha1(rec.normalizar_url(a["u"]).encode()).hexdigest(), a["u"], a["t"],
               a.get("r", ""), a.get("i"), a["p"], generado, ids[a["f"]]))
         cargados += cur.rowcount
+        if a.get("tt"):                          # conservar la traducción ya hecha
+            con.execute("""UPDATE articulos SET titulo_tr=?, resumen_tr=?, idioma_tr=?
+                           WHERE url_hash=? AND titulo_tr IS NULL""",
+                        (a["tt"], a.get("tr", ""), a.get("il", traductor.IDIOMA_DESTINO),
+                         hashlib.sha1(rec.normalizar_url(a["u"]).encode()).hexdigest()))
     con.commit()
     return cargados
 
@@ -121,6 +135,7 @@ def main() -> None:
             return
         print(f"Noticias recuperadas de la publicación anterior: {importar(con, datos)}")
     else:
+        traductor.traducir_pendientes(con)
         datos = exportar(con)
         args.salida.parent.mkdir(parents=True, exist_ok=True)
         args.salida.write_text(json.dumps(datos, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")

@@ -136,11 +136,17 @@
   main { max-width: 760px; margin: 0 auto; padding: 4px 16px 48px; }
   .lista { list-style: none; margin: 0; padding: 0; }
   .nota { border-bottom: 1px solid var(--linea); }
-  .nota a {
+  .nota > a {
     display: grid; grid-template-columns: 1fr auto; gap: 14px;
     padding: 16px 0; color: inherit; text-decoration: none;
   }
-  .nota a:hover .titular { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  .nota.traducida > a { padding-bottom: 8px; }
+  .traduccion {
+    display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline;
+    padding: 0 0 14px; font-size: .8125rem; color: var(--tinta-suave);
+  }
+  .traduccion a { color: var(--oceano); text-underline-offset: 2px; }
+  .nota > a:hover .titular { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
   .meta {
     display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px;
     font-size: .8125rem; color: var(--tinta-suave); margin-bottom: 4px;
@@ -203,6 +209,7 @@
     <button type="button" data-alcance="region" aria-pressed="false"><span class="anillo d2"><i></i></span>Región</button>
     <button type="button" data-alcance="mundo" aria-pressed="false"><span class="anillo d3"><i></i></span>Mundo</button>
     <button type="button" data-alcance="deportes" aria-pressed="false">Deportes</button>
+    <button type="button" data-alcance="espectaculos" aria-pressed="false">Espectáculos</button>
   </nav>
 </header>
 
@@ -270,7 +277,7 @@ async function cargarDatos() {
   datos.local = !!j.local;
   datos.regionLocal = (j.fuentes.find(f => f.pais === datos.paisLocal) || {}).region || "";
   datos.error = "";
-  datos.articulos = j.articulos.map(a => ({ ...a, fuente: j.fuentes[a.f], busq: normalizar(`${a.t} ${a.r || ""}`) }));
+  datos.articulos = j.articulos.map(a => ({ ...a, fuente: j.fuentes[a.f], busq: normalizar(`${a.t} ${a.r || ""} ${a.tt || ""} ${a.tr || ""}`) }));
   $("btnActualizar").textContent = datos.local ? "Buscar nuevas" : "Actualizar";
 }
 
@@ -281,16 +288,24 @@ function enAlcance(a, alcance = estado.alcance) {
     case "region":   return f.categoria === "general" && f.region === datos.regionLocal && f.pais !== datos.paisLocal;
     case "mundo":    return f.categoria === "general" && f.region !== datos.regionLocal;
     case "deportes": return f.categoria === "deportes";
+    case "espectaculos": return f.categoria === "espectaculos";
     default:         return true;
   }
 }
 
 // ---------- pantalla ----------
+const NOMBRES_IDIOMA = { de: "alemán", en: "inglés", fr: "francés", it: "italiano", pt: "portugués" };
+const enlaceTraducido = (url, origen, destino) =>
+  `https://translate.google.com/translate?sl=${origen || "auto"}&tl=${destino || "es"}&u=${encodeURIComponent(url)}`;
+
 function crearNota(n) {
   const li = document.createElement("li");
   li.className = "nota";
+  const traducida = !!n.tt;
   const a = document.createElement("a");
-  a.href = n.u; a.target = "_blank"; a.rel = "noopener noreferrer";
+  // las notas traducidas se abren traducidas (con el traductor de Google)
+  a.href = traducida ? enlaceTraducido(n.u, n.fuente.idioma, n.il) : n.u;
+  a.target = "_blank"; a.rel = "noopener noreferrer";
 
   const texto = document.createElement("div");
   const meta = document.createElement("div");
@@ -312,11 +327,13 @@ function crearNota(n) {
   }
 
   const h = document.createElement("h2");
-  h.className = "titular"; h.textContent = n.t;
+  h.className = "titular"; h.textContent = traducida ? n.tt : n.t;
+  if (traducida) { h.lang = n.il || "es"; h.title = n.t; }
   texto.append(meta, h);
-  if (n.r) {
+  const resumen = traducida ? (n.tr || "") : n.r;
+  if (resumen) {
     const p = document.createElement("p");
-    p.className = "resumen"; p.textContent = n.r;
+    p.className = "resumen"; p.textContent = resumen;
     texto.appendChild(p);
   }
   a.appendChild(texto);
@@ -329,6 +346,21 @@ function crearNota(n) {
     a.appendChild(img);
   }
   li.appendChild(a);
+
+  if (traducida) {
+    li.classList.add("traducida");
+    const pie = document.createElement("div");
+    pie.className = "traduccion";
+    const idioma = NOMBRES_IDIOMA[n.fuente.idioma] || n.fuente.idioma.toUpperCase();
+    const txt = document.createElement("span");
+    txt.textContent = `Traducido del ${idioma}`;
+    const orig = document.createElement("a");
+    orig.href = n.u; orig.target = "_blank"; orig.rel = "noopener noreferrer";
+    orig.textContent = "Ver original";
+    orig.title = n.t;
+    pie.append(txt, orig);
+    li.appendChild(pie);
+  }
   return li;
 }
 
