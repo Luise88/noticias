@@ -76,6 +76,27 @@
     padding: 8px 14px; border-radius: 999px; font-size: .875rem; font-weight: 500;
   }
   .btn-actualizar[disabled] { opacity: .6; cursor: progress; }
+  .botones { display: flex; flex-direction: column; align-items: stretch; gap: 6px; flex-shrink: 0; }
+  .btn-actualizar[aria-pressed="true"] { background: var(--tinta); color: var(--fondo); border-color: var(--tinta); }
+
+  /* ---------- pregunta de idioma al abrir una noticia ---------- */
+  .dialogo {
+    border: 0; padding: 20px 16px calc(16px + env(safe-area-inset-bottom));
+    width: 100%; max-width: 480px; margin: auto auto 0; border-radius: 16px 16px 0 0;
+    background: var(--superficie); color: var(--tinta);
+  }
+  .dialogo::backdrop { background: rgb(14 24 36 / .5); }
+  @media (min-width: 640px) { .dialogo { margin: auto; border-radius: 16px; } }
+  .dialogo h2 { margin: 0 0 4px; font: 600 1.125rem/1.3 var(--serif); }
+  .dialogo .cual { margin: 0 0 16px; font-size: .875rem; color: var(--tinta-suave);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .dialogo .opciones { display: grid; gap: 8px; }
+  .dialogo .opciones a, .dialogo .opciones button {
+    display: block; text-align: center; padding: 12px; border-radius: 10px; font-weight: 500;
+    text-decoration: none; border: 1px solid var(--linea); background: var(--superficie); color: var(--tinta);
+  }
+  .dialogo .opciones a.principal { background: var(--tinta); color: var(--fondo); border-color: var(--tinta); }
+  .dialogo .opciones button { border: 0; background: none; color: var(--tinta-suave); }
 
   /* ---------- selector de alcance: la distancia como eje ---------- */
   .alcance {
@@ -201,7 +222,11 @@
       <h1>Titulares del mundo</h1>
       <p class="contador" id="contador">&nbsp;</p>
     </div>
-    <button class="btn-actualizar" id="btnActualizar" type="button">Actualizar</button>
+    <div class="botones">
+      <button class="btn-actualizar" id="btnActualizar" type="button">Actualizar</button>
+      <button class="btn-actualizar" id="btnTraducir" type="button" aria-pressed="false"
+              title="Mostrar en castellano los titulares que están en inglés">Traducir</button>
+    </div>
   </div>
   <nav class="alcance" id="alcance" aria-label="Alcance de las noticias">
     <button type="button" data-alcance="todo" aria-pressed="true">Todo</button>
@@ -223,6 +248,16 @@
   <div id="estado"></div>
   <div id="centinela" aria-hidden="true"></div>
 </main>
+
+<dialog class="dialogo" id="dlgIdioma" aria-labelledby="dlgTitulo">
+  <h2 id="dlgTitulo">¿En qué idioma querés leerla?</h2>
+  <p class="cual" id="dlgNota"></p>
+  <div class="opciones">
+    <a class="principal" id="dlgCastellano" target="_blank" rel="noopener noreferrer">En castellano</a>
+    <a id="dlgOriginal" target="_blank" rel="noopener noreferrer">En el idioma original</a>
+    <button type="button" id="dlgCancelar">Cancelar</button>
+  </div>
+</dialog>
 
 <div class="toast" id="toast" role="status"></div>
 
@@ -298,14 +333,22 @@ const NOMBRES_IDIOMA = { de: "alemán", en: "inglés", fr: "francés", it: "ital
 const enlaceTraducido = (url, origen, destino) =>
   `https://translate.google.com/translate?sl=${origen || "auto"}&tl=${destino || "es"}&u=${encodeURIComponent(url)}`;
 
+// el inglés se muestra traducido solo si está activado el botón "Traducir";
+// los demás idiomas, siempre
+let traducirIngles = false;
+try { traducirIngles = localStorage.getItem("traducirIngles") === "1"; } catch {}
+const mostrarTraducida = n => !!n.tt && (n.fuente.idioma !== "en" || traducirIngles);
+
 function crearNota(n) {
   const li = document.createElement("li");
   li.className = "nota";
-  const traducida = !!n.tt;
+  const traducida = mostrarTraducida(n);
+  const extranjera = n.fuente.idioma && n.fuente.idioma !== "es";
   const a = document.createElement("a");
-  // las notas traducidas se abren traducidas (con el traductor de Google)
-  a.href = traducida ? enlaceTraducido(n.u, n.fuente.idioma, n.il) : n.u;
-  a.target = "_blank"; a.rel = "noopener noreferrer";
+  a.href = n.u; a.target = "_blank"; a.rel = "noopener noreferrer";
+  if (extranjera) {        // antes de abrir, preguntar en qué idioma leerla
+    a.addEventListener("click", ev => { ev.preventDefault(); preguntarIdioma(n); });
+  }
 
   const texto = document.createElement("div");
   const meta = document.createElement("div");
@@ -352,16 +395,20 @@ function crearNota(n) {
     const pie = document.createElement("div");
     pie.className = "traduccion";
     const idioma = NOMBRES_IDIOMA[n.fuente.idioma] || n.fuente.idioma.toUpperCase();
-    const txt = document.createElement("span");
-    txt.textContent = `Traducido del ${idioma}`;
-    const orig = document.createElement("a");
-    orig.href = n.u; orig.target = "_blank"; orig.rel = "noopener noreferrer";
-    orig.textContent = "Ver original";
-    orig.title = n.t;
-    pie.append(txt, orig);
+    pie.textContent = `Traducido del ${idioma}`;
     li.appendChild(pie);
   }
   return li;
+}
+
+function preguntarIdioma(n) {
+  const idioma = NOMBRES_IDIOMA[n.fuente.idioma] || n.fuente.idioma.toUpperCase();
+  $("dlgNota").textContent = mostrarTraducida(n) ? n.tt : n.t;
+  $("dlgCastellano").href = enlaceTraducido(n.u, n.fuente.idioma, "es");
+  $("dlgOriginal").href = n.u;
+  $("dlgOriginal").textContent = `En ${idioma} (original)`;
+  $("dlgIdioma").showModal();
+  $("dlgCastellano").focus();
 }
 
 function mostrarEstado(html, clase = "aviso") {
@@ -466,6 +513,29 @@ function avisar(texto) {
   t.textContent = texto; t.classList.add("visible");
   clearTimeout(avisar.t); avisar.t = setTimeout(() => t.classList.remove("visible"), 3500);
 }
+
+["dlgCastellano", "dlgOriginal", "dlgCancelar"].forEach(id =>
+  $(id).addEventListener("click", () => $("dlgIdioma").close()));
+$("dlgIdioma").addEventListener("click", ev => {     // tocar afuera cierra
+  if (ev.target === $("dlgIdioma")) $("dlgIdioma").close();
+});
+
+function dibujarBotonTraducir() {
+  const b = $("btnTraducir");
+  b.setAttribute("aria-pressed", String(traducirIngles));
+  b.textContent = traducirIngles ? "Ver en inglés" : "Traducir";
+}
+$("btnTraducir").addEventListener("click", () => {
+  traducirIngles = !traducirIngles;
+  try { localStorage.setItem("traducirIngles", traducirIngles ? "1" : "0"); } catch {}
+  dibujarBotonTraducir();
+  const y = scrollY;
+  aplicarFiltros();
+  scrollTo(0, y);
+  const pendientes = traducirIngles && datos.articulos.some(a => a.fuente.idioma === "en" && !a.tt);
+  if (pendientes) avisar("Algunas noticias recientes todavía no tienen traducción");
+});
+dibujarBotonTraducir();
 
 $("btnActualizar").addEventListener("click", async () => {
   const b = $("btnActualizar");

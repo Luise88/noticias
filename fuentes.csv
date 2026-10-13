@@ -21,13 +21,13 @@ South China Morning Post,https://www.scmp.com/rss/91/feed,HK,Asia,en,general,1
 The Hindu Internacional,https://www.thehindu.com/news/international/feeder/default.rss,IN,Asia,en,general,1
 Times of India,https://timesofindia.indiatimes.com/rssfeedstopstories.cms,IN,Asia,en,general,1
 The Japan Times,https://www.japantimes.co.jp/feed/,JP,Asia,en,general,1
-DW Español,https://rss.dw.com/rdf/rss-sp-all,DE,Europa,es,general,1
-Der Spiegel,https://www.spiegel.de/schlagzeilen/index.rss,DE,Europa,de,general,1
-Frankfurter Allgemeine,https://www.faz.net/rss/aktuell/,DE,Europa,de,general,1
+DW Español,https://rss.dw.com/rdf/rss-sp-all,DE,Europa,es,general,0
+Der Spiegel,https://www.spiegel.de/schlagzeilen/index.rss,DE,Europa,de,general,0
+Frankfurter Allgemeine,https://www.faz.net/rss/aktuell/,DE,Europa,de,general,0
 El País,https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada,ES,Europa,es,general,1
-France 24 Español,https://www.france24.com/es/rss,FR,Europa,es,general,1
-Le Figaro (París),https://www.lefigaro.fr/rss/figaro_actualites.xml,FR,Europa,fr,general,1
-Le Monde (París),https://www.lemonde.fr/rss/une.xml,FR,Europa,fr,general,1
+France 24 Español,https://www.france24.com/es/rss,FR,Europa,es,general,0
+Le Figaro (París),https://www.lefigaro.fr/rss/figaro_actualites.xml,FR,Europa,fr,general,0
+Le Monde (París),https://www.lemonde.fr/rss/une.xml,FR,Europa,fr,general,0
 BBC Mundo,https://feeds.bbci.co.uk/mundo/rss.xml,GB,Europa,es,general,1
 BBC World,https://feeds.bbci.co.uk/news/world/rss.xml,GB,Europa,en,general,1
 Evening Standard (Londres),https://www.standard.co.uk/rss,GB,Europa,en,general,1

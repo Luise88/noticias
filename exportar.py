@@ -42,7 +42,7 @@ def exportar(con, local: bool = False) -> dict:
         SELECT a.titulo, a.resumen, a.url, a.imagen, a.publicado_utc, a.fuente_id,
                a.titulo_tr, a.resumen_tr, a.idioma_tr
         FROM articulos a JOIN fuentes f ON f.id = a.fuente_id
-        WHERE a.publicado_utc >= ?
+        WHERE a.publicado_utc >= ? AND f.activa = 1
         ORDER BY a.publicado_utc DESC, a.id DESC
         LIMIT ?
     """, (desde, MAXIMO)).fetchall()

@@ -25,8 +25,8 @@ import recolector as rec
 
 # ------------------------------------------------------------------ configuración
 IDIOMA_DESTINO = "es"
-IDIOMAS_A_TRADUCIR = {"it", "de", "fr", "pt"}   # agregá "en" para traducir también el inglés
-MAXIMO_POR_CORRIDA = 400       # noticias por corrida; lo que quede se traduce en la siguiente
+IDIOMAS_A_TRADUCIR = {"it", "de", "fr", "pt", "en"}   # el inglés se muestra traducido con el botón "Traducir"
+MAXIMO_POR_CORRIDA = 600       # noticias por corrida; lo que quede se traduce en la siguiente
 DIAS = 3                       # solo se traducen noticias recientes
 LARGO_RESUMEN = 200            # igual que en exportar.py
 CARACTERES_POR_PEDIDO = 1500   # textos que se agrupan en cada consulta al traductor
