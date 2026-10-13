@@ -1,6 +1,6 @@
 // sw.js — permite instalar la app y abrirla aunque no haya conexión
 // (muestra las últimas noticias descargadas).
-const CACHE = "titulares-v4";
+const CACHE = "titulares-v5";
 const BASICOS = ["./", "index.html", "manifest.json", "icono-192.png", "icono-512.png"];
 
 self.addEventListener("install", ev => {
