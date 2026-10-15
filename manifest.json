@@ -1,6 +1,6 @@
 {
-  "name": "Titulares del mundo",
-  "short_name": "Titulares",
+  "name": "NOW",
+  "short_name": "NOW",
   "description": "Noticias de medios de todo el mundo, sin algoritmo que elija por vos.",
   "lang": "es",
   "start_url": "./",
