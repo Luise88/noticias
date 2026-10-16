@@ -82,6 +82,12 @@ def exportar(con, local: bool = False) -> dict:
     return {
         "generado": generado,
         "tendencias": analisis.tendencias(articulos, lista_fuentes, generado),
+        # estado de cada medio en la última recolección (para el Panel de cobertura)
+        "estado_fuentes": [
+            {"n": f["nombre"], "p": f["pais"], "c": f["categoria"],
+             "ok": f["ultimo_estado"] in ("OK", "VACIO", None), "e": (f["ultimo_error"] or "")[:120]}
+            for f in con.execute("SELECT * FROM fuentes WHERE activa = 1 ORDER BY nombre")
+        ],
         "pais_local": PAIS_LOCAL,
         "local": local,          # True cuando lo sirve servidor.py en la notebook
         "fuentes": lista_fuentes,

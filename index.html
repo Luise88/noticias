@@ -239,6 +239,77 @@
     .titular { font-size: 1.3125rem; }
   }
 
+  /* ---------- accesos a Ajustes y Panel ---------- */
+  .extras { display: flex; gap: 6px; margin-top: 8px; }
+  .extras button {
+    display: inline-flex; align-items: center; gap: 5px;
+    border: 1px solid var(--linea); background: none; color: var(--tinta-suave);
+    border-radius: 999px; padding: 3px 10px 3px 8px; font-size: .8125rem;
+  }
+  .extras svg { width: 15px; height: 15px; }
+
+  /* ---------- hojas a pantalla completa (Ajustes, Panel) ---------- */
+  .hoja {
+    border: 0; padding: 0; margin: 0 auto; width: 100%; max-width: 680px;
+    height: 100%; max-height: 100%; background: var(--fondo); color: var(--tinta);
+  }
+  .hoja::backdrop { background: rgb(14 24 36 / .5); }
+  @media (min-width: 720px) { .hoja { margin: 24px auto; height: calc(100% - 48px); border-radius: 16px; } }
+  .hoja-cab {
+    position: sticky; top: 0; z-index: 1; background: var(--fondo);
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: calc(14px + env(safe-area-inset-top)) 16px 12px; border-bottom: 1px solid var(--linea);
+  }
+  .hoja-cab h2 { margin: 0; font: 600 1.375rem/1.2 var(--serif); }
+  .hoja-cuerpo { padding: 8px 16px calc(32px + env(safe-area-inset-bottom)); }
+  .hoja section { padding: 16px 0; border-bottom: 1px solid var(--linea); }
+  .hoja section:last-child { border-bottom: 0; }
+  .hoja h3 { margin: 0 0 4px; font: 600 1.0625rem/1.3 var(--serif); }
+  .hoja .ayuda { margin: 0 0 12px; font-size: .875rem; color: var(--tinta-suave); }
+  .hoja select {
+    font: inherit; color: var(--tinta); background: var(--superficie);
+    border: 1px solid var(--linea); border-radius: 10px; padding: 8px 10px; width: 100%;
+  }
+  .interruptor {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 9px 0; font-size: .9375rem; cursor: pointer;
+  }
+  .interruptor + .interruptor { border-top: 1px solid var(--linea); }
+  .interruptor .det { color: var(--tinta-suave); font-size: .8125rem; }
+  .interruptor input { appearance: none; flex-shrink: 0; width: 42px; height: 24px; border-radius: 999px;
+    background: var(--linea); position: relative; cursor: pointer; transition: background .15s; margin: 0; }
+  .interruptor input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px;
+    border-radius: 50%; background: #fff; transition: transform .15s; box-shadow: 0 1px 2px rgb(0 0 0 / .25); }
+  .interruptor input:checked { background: var(--oceano); }
+  .interruptor input:checked::after { transform: translateX(18px); }
+  @media (prefers-reduced-motion: reduce) { .interruptor input, .interruptor input::after { transition: none; } }
+  .grupo-medios h4 { margin: 14px 0 2px; font-size: .8125rem; font-weight: 600; color: var(--tinta-suave); }
+  .btn-texto { border: 0; background: none; color: var(--oceano); font-size: .875rem; padding: 4px 0; text-decoration: underline; text-underline-offset: 3px; }
+
+  /* ---------- Panel de cobertura ---------- */
+  .kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  @media (min-width: 520px) { .kpis { grid-template-columns: repeat(4, 1fr); } }
+  .kpi { background: var(--superficie); border: 1px solid var(--linea); border-radius: 12px; padding: 10px 12px; }
+  .kpi b { display: block; font: 600 1.625rem/1.1 var(--serif); font-variant-numeric: tabular-nums; }
+  .kpi span { font-size: .8125rem; color: var(--tinta-suave); }
+  .barras { display: grid; grid-template-columns: minmax(96px, max-content) 1fr; gap: 6px 10px; align-items: center; font-size: .875rem; }
+  .barras .et { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+  .barras .pista { display: flex; align-items: center; gap: 6px; }
+  .barras .dato { height: 14px; background: var(--oceano); border-radius: 0 4px 4px 0; min-width: 2px; }
+  .barras .val { color: var(--tinta-suave); font-variant-numeric: tabular-nums; font-size: .8125rem; }
+  .horas { position: relative; }
+  .horas svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .horas .col { fill: var(--oceano); }
+  .horas .col:hover, .horas .col.activa { fill: var(--senal); }
+  .horas text { fill: var(--tinta-suave); font-size: 11px; font-family: var(--sans); }
+  .horas .eje { stroke: var(--linea); }
+  .horas-lectura { min-height: 1.4em; margin: 6px 0 0; font-size: .875rem; color: var(--tinta-suave); }
+  .estado-medio { display: flex; gap: 8px; align-items: baseline; padding: 6px 0; font-size: .875rem; }
+  .estado-medio .ico { flex-shrink: 0; font-weight: 700; }
+  .estado-medio.mal .ico { color: var(--error); }
+  .estado-medio.bien .ico { color: var(--oceano); }
+  .estado-medio small { display: block; color: var(--tinta-suave); }
+
   /* ---------- estados ---------- */
   .aviso {
     text-align: center; color: var(--tinta-suave); padding: 48px 8px; max-width: 46ch; margin: 0 auto;
@@ -264,6 +335,10 @@
     <div>
       <h1>Titulares del mundo</h1>
       <p class="contador" id="contador">&nbsp;</p>
+      <div class="extras">
+        <button type="button" id="btnAjustes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="17" r="2" fill="none" stroke="currentColor" stroke-width="2"/></svg>Ajustes</button>
+        <button type="button" id="btnPanel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V11M12 20V5M19 20v-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>Panel</button>
+      </div>
     </div>
     <div class="botones">
       <button class="btn-actualizar" id="btnActualizar" type="button">Actualizar</button>
@@ -304,6 +379,40 @@
   </div>
 </dialog>
 
+<dialog class="hoja" id="dlgAjustes" aria-labelledby="ajTitulo">
+  <div class="hoja-cab">
+    <h2 id="ajTitulo">Ajustes</h2>
+    <button type="button" class="btn-actualizar" data-cerrar>Listo</button>
+  </div>
+  <div class="hoja-cuerpo">
+    <section>
+      <h3>Tu país</h3>
+      <p class="ayuda">Define qué noticias aparecen en “Cerca” y en “Región”.</p>
+      <select id="ajPais" aria-label="Tu país"></select>
+    </section>
+    <section>
+      <h3>Qué incluye “Todo”</h3>
+      <p class="ayuda">Las noticias generales siempre están. Podés sumar o sacar estas secciones.</p>
+      <label class="interruptor"><span>Deportes</span><input type="checkbox" id="ajDeportes"></label>
+      <label class="interruptor"><span>Espectáculos</span><input type="checkbox" id="ajEspectaculos"></label>
+    </section>
+    <section>
+      <h3>Medios</h3>
+      <p class="ayuda">Apagá los medios que no quieras ver. Se guarda en este teléfono.</p>
+      <button type="button" class="btn-texto" id="ajTodos">Mostrar todos</button>
+      <div id="ajMedios" class="grupo-medios"></div>
+    </section>
+  </div>
+</dialog>
+
+<dialog class="hoja" id="dlgPanel" aria-labelledby="pnTitulo">
+  <div class="hoja-cab">
+    <h2 id="pnTitulo">Panel de cobertura</h2>
+    <button type="button" class="btn-actualizar" data-cerrar>Cerrar</button>
+  </div>
+  <div class="hoja-cuerpo" id="pnCuerpo"></div>
+</dialog>
+
 <div class="toast" id="toast" role="status"></div>
 
 <script>
@@ -319,8 +428,16 @@ const bandera = c => (!c || c.length !== 2) ? "🌐"
 const normalizar = s => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
 const POR_PAGINA = 30;
+
+// Ajustes de este teléfono: tu país, qué entra en "Todo" y qué medios ocultar.
+// Solo filtran lo que se ve; el orden sigue siendo cronológico.
+const AJUSTES_INICIALES = { pais: null, todoDeportes: true, todoEspectaculos: true, ocultos: [] };
+let ajustes = AJUSTES_INICIALES;
+try { ajustes = { ...AJUSTES_INICIALES, ...JSON.parse(localStorage.getItem("ajustes") || "{}") }; } catch {}
+function guardarAjustes() { try { localStorage.setItem("ajustes", JSON.stringify(ajustes)); } catch {} }
+const visible = a => !ajustes.ocultos.includes(a.fuente.nombre);
 const datos = { fuentes: [], articulos: [], paisLocal: "AR", regionLocal: "", generado: null, local: false, error: "",
-                tendencias: [], grupos: new Map() };
+                tendencias: [], grupos: new Map(), estadoFuentes: [] };
 const EN_NOTEBOOK = ["localhost", "127.0.0.1"].includes(location.hostname) || /^192\.168\.|^10\./.test(location.hostname);
 const estado = { alcance: "todo", pais: "", q: "", filtrados: [], mostrados: 0 };
 const $ = id => document.getElementById(id);
@@ -353,7 +470,8 @@ async function cargarDatos() {
     : `El servidor respondió con error ${r.status}.`);
   const j = await r.json();
   datos.fuentes = j.fuentes;
-  datos.paisLocal = j.pais_local || "AR";
+  datos.paisLocal = ajustes.pais || j.pais_local || "AR";
+  datos.estadoFuentes = j.estado_fuentes || [];
   datos.generado = j.generado;
   datos.local = !!j.local;
   datos.regionLocal = (j.fuentes.find(f => f.pais === datos.paisLocal) || {}).region || "";
@@ -377,7 +495,11 @@ function enAlcance(a, alcance = estado.alcance) {
     case "mundo":    return f.categoria === "general" && f.region !== datos.regionLocal;
     case "deportes": return f.categoria === "deportes";
     case "espectaculos": return f.categoria === "espectaculos";
-    default:         return true;
+    default:         // "Todo": general siempre; deportes y espectáculos según Ajustes
+      return f.categoria === "general"
+        || (f.categoria === "deportes" && ajustes.todoDeportes)
+        || (f.categoria === "espectaculos" && ajustes.todoEspectaculos)
+        || !["general", "deportes", "espectaculos"].includes(f.categoria);
   }
 }
 
@@ -596,7 +718,8 @@ function mostrarMas() {
     return;
   }
   const lote = estado.filtrados.slice(estado.mostrados, estado.mostrados + POR_PAGINA);
-  lote.forEach(n => $("lista").appendChild(crearNota(n, n.g !== undefined ? datos.grupos.get(n.g) : null)));
+  lote.forEach(n => $("lista").appendChild(
+    crearNota(n, n.g !== undefined ? datos.grupos.get(n.g).filter(visible) : null)));
   estado.mostrados += lote.length;
   if (!estado.filtrados.length) {
     const q = estado.q.replace(/[<>&]/g, "");
@@ -648,7 +771,7 @@ function aplicarFiltros() {
   } else {
     const vistos = new Set();       // de cada grupo se muestra una sola nota (la más reciente)
     estado.filtrados = intercalar(datos.articulos.filter(a =>
-      enAlcance(a) && (!estado.pais || a.fuente.pais === estado.pais) && (!q || a.busq.includes(q))))
+      visible(a) && enAlcance(a) && (!estado.pais || a.fuente.pais === estado.pais) && (!q || a.busq.includes(q))))
       .filter(a => a.g === undefined || (!vistos.has(a.g) && vistos.add(a.g)));
   }
   estado.mostrados = 0;
@@ -659,7 +782,7 @@ function aplicarFiltros() {
 function dibujarPaises() {
   if (estado.alcance === "guardadas") { $("paises").hidden = true; return; }
   const conteo = {};
-  datos.articulos.forEach(a => { if (enAlcance(a)) conteo[a.fuente.pais] = (conteo[a.fuente.pais] || 0) + 1; });
+  datos.articulos.forEach(a => { if (visible(a) && enAlcance(a)) conteo[a.fuente.pais] = (conteo[a.fuente.pais] || 0) + 1; });
   const paises = Object.entries(conteo).sort((x, y) => y[1] - x[1]);
   const cont = $("paises");
   cont.innerHTML = "";
@@ -790,6 +913,195 @@ $("btnActualizar").addEventListener("click", async () => {
     if (!b.textContent) b.textContent = etiqueta;
   }
 });
+
+// ---------- Ajustes ----------
+const NOMBRES_CATEGORIA = { general: "Noticias generales", deportes: "Deportes", espectaculos: "Espectáculos" };
+function abrirAjustes() {
+  // tu país
+  const paises = [...new Set(datos.fuentes.map(f => f.pais).filter(p => p && p.length === 2))]
+    .sort((x, y) => nombrePais(x).localeCompare(nombrePais(y), "es"));
+  $("ajPais").innerHTML = "";
+  paises.forEach(p => {
+    const o = document.createElement("option");
+    o.value = p; o.textContent = `${bandera(p)} ${nombrePais(p)}`; o.selected = p === datos.paisLocal;
+    $("ajPais").appendChild(o);
+  });
+  $("ajDeportes").checked = ajustes.todoDeportes;
+  $("ajEspectaculos").checked = ajustes.todoEspectaculos;
+  dibujarMediosAjustes();
+  $("dlgAjustes").showModal();
+}
+function dibujarMediosAjustes() {
+  const cantidad = {};
+  datos.articulos.forEach(a => { cantidad[a.fuente.nombre] = (cantidad[a.fuente.nombre] || 0) + 1; });
+  const lista = datos.estadoFuentes.length
+    ? datos.estadoFuentes.map(e => ({ nombre: e.n, pais: e.p, categoria: e.c }))
+    : datos.fuentes;
+  const cont = $("ajMedios");
+  cont.innerHTML = "";
+  ["general", "deportes", "espectaculos"].forEach(cat => {
+    const medios = lista.filter(f => (f.categoria || "general") === cat)
+      .sort((x, y) => nombrePais(x.pais).localeCompare(nombrePais(y.pais), "es") || x.nombre.localeCompare(y.nombre, "es"));
+    if (!medios.length) return;
+    const h = document.createElement("h4"); h.textContent = NOMBRES_CATEGORIA[cat]; cont.appendChild(h);
+    medios.forEach(f => {
+      const l = document.createElement("label"); l.className = "interruptor";
+      const t = document.createElement("span");
+      t.textContent = `${bandera(f.pais)} ${f.nombre} `;
+      const d = document.createElement("span"); d.className = "det";
+      d.textContent = cantidad[f.nombre] ? `${cantidad[f.nombre]} noticias` : "sin noticias recientes";
+      t.appendChild(d);
+      const i = document.createElement("input"); i.type = "checkbox";
+      i.checked = !ajustes.ocultos.includes(f.nombre);
+      i.setAttribute("aria-label", `Mostrar ${f.nombre}`);
+      i.addEventListener("change", () => {
+        ajustes.ocultos = i.checked ? ajustes.ocultos.filter(n => n !== f.nombre) : [...ajustes.ocultos, f.nombre];
+        guardarAjustes();
+      });
+      l.append(t, i); cont.appendChild(l);
+    });
+  });
+}
+$("btnAjustes").addEventListener("click", abrirAjustes);
+$("ajPais").addEventListener("change", ev => {
+  ajustes.pais = ev.target.value; guardarAjustes();
+  datos.paisLocal = ajustes.pais;
+  datos.regionLocal = (datos.fuentes.find(f => f.pais === datos.paisLocal) || {}).region || "";
+});
+$("ajDeportes").addEventListener("change", ev => { ajustes.todoDeportes = ev.target.checked; guardarAjustes(); });
+$("ajEspectaculos").addEventListener("change", ev => { ajustes.todoEspectaculos = ev.target.checked; guardarAjustes(); });
+$("ajTodos").addEventListener("click", () => { ajustes.ocultos = []; guardarAjustes(); dibujarMediosAjustes(); });
+$("dlgAjustes").addEventListener("close", () => { estado.pais = ""; redibujarTodo(); });
+
+// ---------- Panel de cobertura ----------
+function seccion(titulo, ayuda) {
+  const s = document.createElement("section");
+  const h = document.createElement("h3"); h.textContent = titulo; s.appendChild(h);
+  if (ayuda) { const p = document.createElement("p"); p.className = "ayuda"; p.textContent = ayuda; s.appendChild(p); }
+  return s;
+}
+function barras(filas) {      // filas: [[etiqueta, valor, título]]
+  const max = Math.max(1, ...filas.map(f => f[1]));
+  const g = document.createElement("div"); g.className = "barras";
+  filas.forEach(([et, val, tit]) => {
+    const e = document.createElement("span"); e.className = "et"; e.textContent = et; e.title = tit || et;
+    const pista = document.createElement("span"); pista.className = "pista";
+    const b = document.createElement("span"); b.className = "dato";
+    b.style.width = `calc((100% - 44px) * ${val / max})`;
+    b.title = `${tit || et}: ${val.toLocaleString("es-AR")} noticias`;
+    const v = document.createElement("span"); v.className = "val"; v.textContent = val.toLocaleString("es-AR");
+    pista.append(b, v); g.append(e, pista);
+  });
+  return g;
+}
+function contar(lista, clave) {
+  const c = new Map();
+  lista.forEach(a => { const k = clave(a); c.set(k, (c.get(k) || 0) + 1); });
+  return [...c.entries()].sort((x, y) => y[1] - x[1]);
+}
+function abrirPanel() {
+  const arts = datos.articulos;
+  const cuerpo = $("pnCuerpo");
+  cuerpo.innerHTML = "";
+  const horasTotal = datos.generado && arts.length
+    ? Math.max(1, Math.round((new Date(datos.generado) - new Date(arts[arts.length - 1].p)) / 3600000)) : 0;
+
+  // números principales
+  const s1 = seccion("Resumen", horasTotal ? `Noticias de las últimas ${horasTotal} horas, de todos los medios.` : "");
+  const k = document.createElement("div"); k.className = "kpis";
+  [[arts.length, "noticias"], [new Set(arts.map(a => a.fuente.nombre)).size, "medios"],
+   [new Set(arts.map(a => a.fuente.pais)).size, "países"], [datos.grupos.size, "historias en varios medios"]]
+    .forEach(([n, t]) => {
+      const d = document.createElement("div"); d.className = "kpi";
+      d.innerHTML = "<b></b><span></span>";
+      d.querySelector("b").textContent = n.toLocaleString("es-AR"); d.querySelector("span").textContent = t;
+      k.appendChild(d);
+    });
+  s1.appendChild(k); cuerpo.appendChild(s1);
+
+  // por país
+  const s2 = seccion("Noticias por país", "Sirve para ver si tu lista de medios está equilibrada entre regiones.");
+  s2.appendChild(barras(contar(arts, a => a.fuente.pais).map(([p, n]) => [`${bandera(p)} ${nombrePais(p)}`, n])));
+  cuerpo.appendChild(s2);
+
+  // por hora
+  const s3 = seccion("A qué hora se publica", "Cantidad de noticias según la hora de publicación (hora de tu teléfono). Tocá una barra para ver el número.");
+  const porHora = Array(24).fill(0);
+  arts.forEach(a => { porHora[new Date(a.p).getHours()]++; });
+  const maxH = Math.max(1, ...porHora);
+  const W = 480, H = 130, ancho = W / 24;
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("viewBox", `0 0 ${W} ${H + 20}`);
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", "Noticias por hora: " + porHora.map((n, h) => `${h} h ${n}`).join(", "));
+  const eje = document.createElementNS(ns, "line");
+  eje.setAttribute("x1", 0); eje.setAttribute("x2", W); eje.setAttribute("y1", H); eje.setAttribute("y2", H);
+  eje.setAttribute("class", "eje"); svg.appendChild(eje);
+  const lectura = document.createElement("p"); lectura.className = "horas-lectura";
+  const hMax = porHora.indexOf(maxH);
+  lectura.textContent = `La hora con más noticias: ${hMax} h (${maxH.toLocaleString("es-AR")}).`;
+  porHora.forEach((n, h) => {
+    const alto = Math.max(n ? 2 : 0, (n / maxH) * (H - 8));
+    const r = document.createElementNS(ns, "path");     // barra con la punta de arriba redondeada
+    const x = h * ancho + 2, w = ancho - 4, y = H - alto, rr = Math.min(4, alto, w / 2);
+    r.setAttribute("d", alto ? `M${x},${H} V${y + rr} Q${x},${y} ${x + rr},${y} H${x + w - rr} Q${x + w},${y} ${x + w},${y + rr} V${H} Z` : "");
+    r.setAttribute("class", "col");
+    const tt = document.createElementNS(ns, "title"); tt.textContent = `${h} h: ${n} noticias`; r.appendChild(tt);
+    const zona = document.createElementNS(ns, "rect");  // zona de toque más grande que la barra
+    zona.setAttribute("x", h * ancho); zona.setAttribute("y", 0); zona.setAttribute("width", ancho); zona.setAttribute("height", H);
+    zona.setAttribute("fill", "transparent");
+    const mostrar = () => {
+      svg.querySelectorAll(".col.activa").forEach(c => c.classList.remove("activa"));
+      r.classList.add("activa");
+      lectura.textContent = `${h} h: ${n.toLocaleString("es-AR")} noticias`;
+    };
+    zona.addEventListener("click", mostrar); zona.addEventListener("mouseenter", mostrar);
+    svg.append(r, zona);
+    if (h % 6 === 0) {
+      const t = document.createElementNS(ns, "text");
+      t.setAttribute("x", h * ancho + 2); t.setAttribute("y", H + 15); t.textContent = `${h} h`;
+      svg.appendChild(t);
+    }
+  });
+  const caja = document.createElement("div"); caja.className = "horas"; caja.append(svg, lectura);
+  s3.appendChild(caja); cuerpo.appendChild(s3);
+
+  // medios más activos
+  const s4 = seccion("Medios que más publican");
+  s4.appendChild(barras(contar(arts, a => a.fuente.nombre).slice(0, 12).map(([m, n]) => [m, n])));
+  cuerpo.appendChild(s4);
+
+  // idiomas
+  const s5 = seccion("Idiomas de origen");
+  const NOM = { es: "Castellano", ...Object.fromEntries(Object.entries(NOMBRES_IDIOMA).map(([k, v]) => [k, v[0].toUpperCase() + v.slice(1)])) };
+  s5.appendChild(barras(contar(arts, a => a.fuente.idioma).map(([i, n]) => [NOM[i] || i, n])));
+  cuerpo.appendChild(s5);
+
+  // estado de los medios
+  const est = datos.estadoFuentes;
+  if (est.length) {
+    const mal = est.filter(e => !e.ok);
+    const s6 = seccion("Estado de los medios",
+      `${est.length - mal.length} de ${est.length} funcionaron en la última actualización.`);
+    (mal.length ? mal : []).forEach(e => {
+      const d = document.createElement("div"); d.className = "estado-medio mal";
+      d.innerHTML = '<span class="ico" aria-hidden="true">✕</span><span><b></b><small></small></span>';
+      d.querySelector("b").textContent = `${bandera(e.p)} ${e.n}: con problemas`;
+      d.querySelector("small").textContent = e.e || "No respondió";
+      s6.appendChild(d);
+    });
+    if (!mal.length) {
+      const d = document.createElement("div"); d.className = "estado-medio bien";
+      d.innerHTML = '<span class="ico" aria-hidden="true">✓</span><span>Todos los medios respondieron bien.</span>';
+      s6.appendChild(d);
+    }
+    cuerpo.appendChild(s6);
+  }
+  $("dlgPanel").showModal();
+}
+$("btnPanel").addEventListener("click", abrirPanel);
+document.querySelectorAll("[data-cerrar]").forEach(b => b.addEventListener("click", () => b.closest("dialog").close()));
 
 // carga más notas al llegar al final de la lista
 new IntersectionObserver(entradas => {
