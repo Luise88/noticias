@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS fuentes (
     region               TEXT,
     idioma               TEXT,
     categoria            TEXT DEFAULT 'general',   -- general / deportes / ...
+    pago                 INTEGER DEFAULT 0,        -- 1 = puede pedir suscripción (muro de pago)
     activa               INTEGER DEFAULT 1,
     ultimo_intento       TEXT,
     ultimo_estado        TEXT,          -- OK / ERROR / VACIO
@@ -161,6 +162,8 @@ def abrir_db(ruta: Path) -> sqlite3.Connection:
     columnas = {c[1] for c in con.execute("PRAGMA table_info(fuentes)")}
     if "categoria" not in columnas:
         con.execute("ALTER TABLE fuentes ADD COLUMN categoria TEXT DEFAULT 'general'")
+    if "pago" not in columnas:
+        con.execute("ALTER TABLE fuentes ADD COLUMN pago INTEGER DEFAULT 0")
     return con
 
 
@@ -175,11 +178,11 @@ def cargar_fuentes(con: sqlite3.Connection, ruta_csv: Path) -> list[sqlite3.Row]
                 continue
             nombres_csv.append(fila["nombre"].strip())
             con.execute("""
-                INSERT INTO fuentes (nombre, url_rss, pais, region, idioma, categoria, activa)
-                VALUES (:nombre, :url_rss, :pais, :region, :idioma, :categoria, :activa)
+                INSERT INTO fuentes (nombre, url_rss, pais, region, idioma, categoria, pago, activa)
+                VALUES (:nombre, :url_rss, :pais, :region, :idioma, :categoria, :pago, :activa)
                 ON CONFLICT(nombre) DO UPDATE SET
                     url_rss=excluded.url_rss, pais=excluded.pais, region=excluded.region,
-                    idioma=excluded.idioma, categoria=excluded.categoria, activa=excluded.activa
+                    idioma=excluded.idioma, categoria=excluded.categoria, pago=excluded.pago, activa=excluded.activa
             """, {
                 "nombre": fila["nombre"].strip(),
                 "url_rss": fila["url_rss"].strip(),
@@ -187,6 +190,7 @@ def cargar_fuentes(con: sqlite3.Connection, ruta_csv: Path) -> list[sqlite3.Row]
                 "region": (fila.get("region") or "").strip(),
                 "idioma": (fila.get("idioma") or "").strip().lower(),
                 "categoria": (fila.get("categoria") or "general").strip().lower(),
+                "pago": int((fila.get("pago") or "0").strip() or 0),
                 "activa": int((fila.get("activa") or "1").strip() or 1),
             })
     marcas = ",".join("?" * len(nombres_csv)) or "''"

@@ -161,12 +161,55 @@
     display: grid; grid-template-columns: 1fr auto; gap: 14px;
     padding: 16px 0; color: inherit; text-decoration: none;
   }
-  .nota.traducida > a { padding-bottom: 8px; }
-  .traduccion {
-    display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline;
-    padding: 0 0 14px; font-size: .8125rem; color: var(--tinta-suave);
+  .nota > a { padding-bottom: 6px; }
+  /* fila de acciones debajo de cada nota */
+  .acciones {
+    display: flex; align-items: center; gap: 6px 10px; flex-wrap: wrap;
+    padding: 0 0 10px; font-size: .8125rem; color: var(--tinta-suave);
   }
-  .traduccion a { color: var(--oceano); text-underline-offset: 2px; }
+  .acciones .nota-trad { margin-right: auto; }
+  .acciones .espacio { margin-left: auto; }
+  .btn-grupo {
+    display: inline-flex; align-items: center; gap: 6px; margin-right: auto;
+    border: 1px solid var(--linea); background: var(--superficie); color: var(--tinta);
+    border-radius: 999px; padding: 4px 10px; font-size: .8125rem; font-weight: 500;
+  }
+  .btn-grupo svg { width: 12px; height: 12px; transition: transform .15s; }
+  .btn-grupo[aria-expanded="true"] svg { transform: rotate(180deg); }
+  .btn-icono {
+    display: inline-grid; place-items: center; width: 34px; height: 34px;
+    border: 0; background: none; color: var(--tinta-suave); border-radius: 50%;
+  }
+  .btn-icono:hover { background: var(--linea); color: var(--tinta); }
+  .btn-icono svg { width: 19px; height: 19px; }
+  .btn-icono[aria-pressed="true"] { color: var(--oceano); }
+  @media (prefers-reduced-motion: reduce) { .btn-grupo svg { transition: none; } }
+  /* otros medios que cubren la misma noticia */
+  .grupo-lista {
+    list-style: none; margin: 0 0 14px; padding: 4px 0 4px 12px;
+    border-left: 3px solid var(--senal);
+  }
+  .grupo-lista li + li { margin-top: 10px; }
+  .grupo-lista a { display: block; color: inherit; text-decoration: none; }
+  .grupo-lista .meta { margin-bottom: 2px; }
+  .grupo-lista .titulo-otro { font: 600 1rem/1.3 var(--serif); }
+  .grupo-lista a:hover .titulo-otro { text-decoration: underline; text-underline-offset: 3px; }
+  /* notas ya abiertas */
+  .nota.leida .titular, .grupo-lista .leida .titulo-otro { color: var(--tinta-suave); font-weight: 500; }
+  .nota.leida .foto { opacity: .65; }
+  .candado { display: inline-flex; color: var(--tinta-suave); }
+  .candado svg { width: 12px; height: 12px; }
+  /* tendencias */
+  .tendencias { display: flex; gap: 6px; overflow-x: auto; padding: 10px 0 0; scrollbar-width: none; }
+  .tendencias::-webkit-scrollbar { display: none; }
+  .tendencias button {
+    flex-shrink: 0; border: 1px solid var(--senal); background: transparent; color: var(--tinta);
+    border-radius: 999px; padding: 4px 10px; font-size: .8125rem; font-weight: 500;
+    display: inline-flex; gap: 6px; align-items: center;
+  }
+  .tendencias button span { color: var(--tinta-suave); font-weight: 400; font-variant-numeric: tabular-nums; }
+  .tendencias button[aria-pressed="true"] { background: var(--senal); color: #14243A; }
+  .tendencias button[aria-pressed="true"] span { color: inherit; opacity: .75; }
   .nota > a:hover .titular { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
   .meta {
     display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px;
@@ -235,11 +278,13 @@
     <button type="button" data-alcance="mundo" aria-pressed="false"><span class="anillo d3"><i></i></span>Mundo</button>
     <button type="button" data-alcance="deportes" aria-pressed="false">Deportes</button>
     <button type="button" data-alcance="espectaculos" aria-pressed="false">Espectáculos</button>
+    <button type="button" data-alcance="guardadas" aria-pressed="false">Guardadas</button>
   </nav>
 </header>
 
 <div class="filtros">
   <input class="buscador" id="buscador" type="search" placeholder="Buscar en los titulares" aria-label="Buscar en los titulares" autocomplete="off">
+  <div class="tendencias" id="tendencias" role="group" aria-label="Temas del momento" hidden></div>
   <div class="paises" id="paises" role="group" aria-label="Filtrar por país"></div>
 </div>
 
@@ -274,7 +319,8 @@ const bandera = c => (!c || c.length !== 2) ? "🌐"
 const normalizar = s => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
 const POR_PAGINA = 30;
-const datos = { fuentes: [], articulos: [], paisLocal: "AR", regionLocal: "", generado: null, local: false, error: "" };
+const datos = { fuentes: [], articulos: [], paisLocal: "AR", regionLocal: "", generado: null, local: false, error: "",
+                tendencias: [], grupos: new Map() };
 const EN_NOTEBOOK = ["localhost", "127.0.0.1"].includes(location.hostname) || /^192\.168\.|^10\./.test(location.hostname);
 const estado = { alcance: "todo", pais: "", q: "", filtrados: [], mostrados: 0 };
 const $ = id => document.getElementById(id);
@@ -313,6 +359,13 @@ async function cargarDatos() {
   datos.regionLocal = (j.fuentes.find(f => f.pais === datos.paisLocal) || {}).region || "";
   datos.error = "";
   datos.articulos = j.articulos.map(a => ({ ...a, fuente: j.fuentes[a.f], busq: normalizar(`${a.t} ${a.r || ""} ${a.tt || ""} ${a.tr || ""}`) }));
+  datos.tendencias = j.tendencias || [];
+  datos.grupos = new Map();              // número de grupo -> notas del mismo hecho
+  datos.articulos.forEach(a => {
+    if (a.g === undefined) return;
+    if (!datos.grupos.has(a.g)) datos.grupos.set(a.g, []);
+    datos.grupos.get(a.g).push(a);
+  });
   $("btnActualizar").textContent = datos.local ? "Buscar nuevas" : "Actualizar";
 }
 
@@ -332,6 +385,57 @@ function enAlcance(a, alcance = estado.alcance) {
 const NOMBRES_IDIOMA = { de: "alemán", en: "inglés", fr: "francés", it: "italiano", pt: "portugués" };
 const enlaceTraducido = (url, origen, destino) =>
   `https://translate.google.com/translate?sl=${origen || "auto"}&tl=${destino || "es"}&u=${encodeURIComponent(url)}`;
+const ICONOS = {
+  guardar: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
+  guardado: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
+  compartir: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  candado: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.2"/></svg>',
+  flecha: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+};
+
+// ---------- lo que se guarda solo en este teléfono (no cambia el orden de nada)
+function leerLocal(clave, porDefecto) {
+  try { return JSON.parse(localStorage.getItem(clave)) ?? porDefecto; } catch { return porDefecto; }
+}
+function escribirLocal(clave, valor) {
+  try { localStorage.setItem(clave, JSON.stringify(valor)); } catch {}
+}
+const leidas = new Set(leerLocal("leidas", []));
+let guardadas = leerLocal("guardadas", []);          // [{...nota, guardada: fecha}]
+
+function marcarLeida(n) {
+  if (leidas.has(n.u)) return;
+  leidas.add(n.u);
+  escribirLocal("leidas", [...leidas].slice(-3000));
+  document.querySelectorAll(`[data-url="${CSS.escape(n.u)}"]`).forEach(el => el.classList.add("leida"));
+}
+const estaGuardada = n => guardadas.some(g => g.u === n.u);
+function alternarGuardada(n, boton) {
+  if (estaGuardada(n)) {
+    guardadas = guardadas.filter(g => g.u !== n.u);
+    avisar("Quitada de Guardadas");
+  } else {
+    const { t, tt, r, tr, u, p, i, il, fuente } = n;
+    guardadas.unshift({ t, tt, r, tr, u, p, i, il, fuente, guardada: new Date().toISOString() });
+    avisar("Guardada para leer después");
+  }
+  escribirLocal("guardadas", guardadas);
+  const si = estaGuardada(n);
+  boton.innerHTML = si ? ICONOS.guardado : ICONOS.guardar;
+  boton.setAttribute("aria-pressed", String(si));
+  boton.setAttribute("aria-label", si ? "Quitar de Guardadas" : "Guardar para leer después");
+  if (estado.alcance === "guardadas" && !si) aplicarFiltros();
+}
+async function compartir(n) {
+  const titulo = mostrarTraducida(n) ? n.tt : n.t;
+  try {
+    if (navigator.share) { await navigator.share({ title: titulo, text: `${titulo} (${n.fuente.nombre})`, url: n.u }); return; }
+    await navigator.clipboard.writeText(`${titulo}\n${n.u}`);
+    avisar("Link copiado");
+  } catch (e) {
+    if (e && e.name !== "AbortError") avisar("No se pudo compartir");
+  }
+}
 
 // el inglés se muestra traducido solo si está activado el botón "Traducir";
 // los demás idiomas, siempre
@@ -339,18 +443,15 @@ let traducirIngles = false;
 try { traducirIngles = localStorage.getItem("traducirIngles") === "1"; } catch {}
 const mostrarTraducida = n => !!n.tt && (n.fuente.idioma !== "en" || traducirIngles);
 
-function crearNota(n) {
-  const li = document.createElement("li");
-  li.className = "nota";
-  const traducida = mostrarTraducida(n);
-  const extranjera = n.fuente.idioma && n.fuente.idioma !== "es";
-  const a = document.createElement("a");
-  a.href = n.u; a.target = "_blank"; a.rel = "noopener noreferrer";
-  if (extranjera) {        // antes de abrir, preguntar en qué idioma leerla
-    a.addEventListener("click", ev => { ev.preventDefault(); preguntarIdioma(n); });
+function abrirNota(ev, n) {
+  marcarLeida(n);
+  if (n.fuente.idioma && n.fuente.idioma !== "es") {     // antes de abrir, preguntar el idioma
+    ev.preventDefault();
+    preguntarIdioma(n);
   }
+}
 
-  const texto = document.createElement("div");
+function crearMeta(n) {
   const meta = document.createElement("div");
   meta.className = "meta";
   const bnd = document.createElement("span");
@@ -358,21 +459,42 @@ function crearNota(n) {
   bnd.title = nombrePais(n.fuente.pais); bnd.setAttribute("aria-label", bnd.title);
   const medio = document.createElement("span");
   medio.className = "medio"; medio.textContent = n.fuente.nombre;
+  meta.append(bnd, medio);
+  if (n.fuente.pago) {
+    const c = document.createElement("span");
+    c.className = "candado"; c.innerHTML = ICONOS.candado;
+    c.title = "Este medio puede pedir suscripción para leer la nota completa";
+    c.setAttribute("aria-label", c.title);
+    meta.appendChild(c);
+  }
   const t = document.createElement("time");
   t.dateTime = n.p; t.textContent = haceCuanto(n.p);
   t.title = new Date(n.p).toLocaleString("es-AR");
-  meta.append(bnd, medio, t);
+  meta.appendChild(t);
   if (n.fuente.idioma && n.fuente.idioma !== "es") {
     const idi = document.createElement("span");
     idi.className = "idioma"; idi.textContent = n.fuente.idioma.toUpperCase();
     idi.title = "Idioma del artículo";
     meta.appendChild(idi);
   }
+  return meta;
+}
 
+function crearNota(n, grupo = null) {
+  const li = document.createElement("li");
+  li.className = "nota";
+  li.dataset.url = n.u;
+  if (leidas.has(n.u)) li.classList.add("leida");
+  const traducida = mostrarTraducida(n);
+  const a = document.createElement("a");
+  a.href = n.u; a.target = "_blank"; a.rel = "noopener noreferrer";
+  a.addEventListener("click", ev => abrirNota(ev, n));
+
+  const texto = document.createElement("div");
   const h = document.createElement("h2");
   h.className = "titular"; h.textContent = traducida ? n.tt : n.t;
   if (traducida) { h.lang = n.il || "es"; h.title = n.t; }
-  texto.append(meta, h);
+  texto.append(crearMeta(n), h);
   const resumen = traducida ? (n.tr || "") : n.r;
   if (resumen) {
     const p = document.createElement("p");
@@ -380,7 +502,6 @@ function crearNota(n) {
     texto.appendChild(p);
   }
   a.appendChild(texto);
-
   if (n.i) {
     const img = document.createElement("img");
     img.className = "foto"; img.src = n.i; img.alt = "";
@@ -390,15 +511,69 @@ function crearNota(n) {
   }
   li.appendChild(a);
 
-  if (traducida) {
-    li.classList.add("traducida");
-    const pie = document.createElement("div");
-    pie.className = "traduccion";
-    const idioma = NOMBRES_IDIOMA[n.fuente.idioma] || n.fuente.idioma.toUpperCase();
-    pie.textContent = `Traducido del ${idioma}`;
-    li.appendChild(pie);
+  // ---- fila de acciones
+  const acciones = document.createElement("div");
+  acciones.className = "acciones";
+  const otros = grupo ? grupo.filter(x => x !== n) : [];
+  if (otros.length) {
+    const medios = new Set(grupo.map(x => x.fuente.nombre)).size;
+    const paises = new Set(grupo.map(x => x.fuente.pais)).size;
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "btn-grupo";
+    b.setAttribute("aria-expanded", "false");
+    b.innerHTML = `<span></span>${ICONOS.flecha}`;
+    b.firstChild.textContent = `${medios} medios de ${paises} ${paises === 1 ? "país" : "países"}`;
+    b.title = "Ver cómo la cuentan los otros medios";
+    let lista = null;
+    b.addEventListener("click", () => {
+      const abrir = b.getAttribute("aria-expanded") !== "true";
+      b.setAttribute("aria-expanded", String(abrir));
+      if (abrir) { lista = crearListaGrupo(otros); li.appendChild(lista); }
+      else if (lista) { lista.remove(); lista = null; }
+    });
+    acciones.appendChild(b);
+  } else if (traducida) {
+    const nt = document.createElement("span");
+    nt.className = "nota-trad";
+    nt.textContent = `Traducido del ${NOMBRES_IDIOMA[n.fuente.idioma] || n.fuente.idioma.toUpperCase()}`;
+    acciones.appendChild(nt);
+  } else {
+    const esp = document.createElement("span"); esp.className = "espacio"; acciones.appendChild(esp);
   }
+  const bg = document.createElement("button");
+  bg.type = "button"; bg.className = "btn-icono";
+  const si = estaGuardada(n);
+  bg.innerHTML = si ? ICONOS.guardado : ICONOS.guardar;
+  bg.setAttribute("aria-pressed", String(si));
+  bg.setAttribute("aria-label", si ? "Quitar de Guardadas" : "Guardar para leer después");
+  bg.addEventListener("click", () => alternarGuardada(n, bg));
+  const bc = document.createElement("button");
+  bc.type = "button"; bc.className = "btn-icono"; bc.innerHTML = ICONOS.compartir;
+  bc.setAttribute("aria-label", "Compartir");
+  bc.addEventListener("click", () => compartir(n));
+  acciones.append(bg, bc);
+  li.appendChild(acciones);
   return li;
+}
+
+function crearListaGrupo(otros) {
+  const ul = document.createElement("ul");
+  ul.className = "grupo-lista";
+  otros.slice().sort((x, y) => (y.p > x.p) - (y.p < x.p)).forEach(n => {
+    const li = document.createElement("li");
+    li.dataset.url = n.u;
+    if (leidas.has(n.u)) li.classList.add("leida");
+    const a = document.createElement("a");
+    a.href = n.u; a.target = "_blank"; a.rel = "noopener noreferrer";
+    a.addEventListener("click", ev => abrirNota(ev, n));
+    const t = document.createElement("div");
+    t.className = "titulo-otro";
+    t.textContent = mostrarTraducida(n) ? n.tt : n.t;
+    a.append(crearMeta(n), t);
+    li.appendChild(a);
+    ul.appendChild(li);
+  });
+  return ul;
 }
 
 function preguntarIdioma(n) {
@@ -421,13 +596,15 @@ function mostrarMas() {
     return;
   }
   const lote = estado.filtrados.slice(estado.mostrados, estado.mostrados + POR_PAGINA);
-  lote.forEach(n => $("lista").appendChild(crearNota(n)));
+  lote.forEach(n => $("lista").appendChild(crearNota(n, n.g !== undefined ? datos.grupos.get(n.g) : null)));
   estado.mostrados += lote.length;
   if (!estado.filtrados.length) {
     const q = estado.q.replace(/[<>&]/g, "");
     mostrarEstado(q
       ? `<strong>Sin resultados para “${q}”</strong>Probá con otra palabra o elegí “Todo”.`
-      : `<strong>No hay noticias en esta sección</strong>Tocá “${$("btnActualizar").textContent}” para traer las últimas.`);
+      : estado.alcance === "guardadas"
+        ? `<strong>Todavía no guardaste noticias</strong>Tocá el ícono de marcador en cualquier nota para leerla después. Quedan guardadas en este teléfono.`
+        : `<strong>No hay noticias en esta sección</strong>Tocá “${$("btnActualizar").textContent}” para traer las últimas.`);
   } else {
     mostrarEstado(estado.mostrados >= estado.filtrados.length ? "Llegaste al final." : "", "cargando");
   }
@@ -465,14 +642,22 @@ function intercalar(lista) {
 
 function aplicarFiltros() {
   const q = normalizar(estado.q);
-  estado.filtrados = intercalar(datos.articulos.filter(a =>
-    enAlcance(a) && (!estado.pais || a.fuente.pais === estado.pais) && (!q || a.busq.includes(q))));
+  if (estado.alcance === "guardadas") {
+    estado.filtrados = guardadas.filter(a =>
+      !q || normalizar(`${a.t} ${a.r || ""} ${a.tt || ""} ${a.tr || ""}`).includes(q));
+  } else {
+    const vistos = new Set();       // de cada grupo se muestra una sola nota (la más reciente)
+    estado.filtrados = intercalar(datos.articulos.filter(a =>
+      enAlcance(a) && (!estado.pais || a.fuente.pais === estado.pais) && (!q || a.busq.includes(q))))
+      .filter(a => a.g === undefined || (!vistos.has(a.g) && vistos.add(a.g)));
+  }
   estado.mostrados = 0;
   $("lista").innerHTML = "";
   mostrarMas();
 }
 
 function dibujarPaises() {
+  if (estado.alcance === "guardadas") { $("paises").hidden = true; return; }
   const conteo = {};
   datos.articulos.forEach(a => { if (enAlcance(a)) conteo[a.fuente.pais] = (conteo[a.fuente.pais] || 0) + 1; });
   const paises = Object.entries(conteo).sort((x, y) => y[1] - x[1]);
@@ -493,6 +678,29 @@ function dibujarPaises() {
   });
 }
 
+function dibujarTendencias() {
+  const cont = $("tendencias");
+  cont.innerHTML = "";
+  cont.hidden = !datos.tendencias.length || estado.alcance === "guardadas";
+  if (cont.hidden) return;
+  datos.tendencias.forEach(({ t, n }) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.setAttribute("aria-pressed", String(normalizar(estado.q) === normalizar(t)));
+    b.textContent = t;
+    b.title = `Lo mencionan ${n} medios en las últimas horas`;
+    const s = document.createElement("span"); s.textContent = n; b.appendChild(s);
+    b.onclick = () => {
+      const activa = normalizar(estado.q) === normalizar(t);
+      estado.q = activa ? "" : t;
+      $("buscador").value = estado.q;
+      dibujarTendencias();
+      aplicarFiltros();
+    };
+    cont.appendChild(b);
+  });
+}
+
 function dibujarContador() {
   if (datos.error) { $("contador").textContent = ""; return; }
   const n = datos.articulos.length.toLocaleString("es-AR");
@@ -501,7 +709,7 @@ function dibujarContador() {
     : `${n} noticias`;
 }
 
-function redibujarTodo() { dibujarContador(); dibujarPaises(); aplicarFiltros(); }
+function redibujarTodo() { dibujarContador(); dibujarTendencias(); dibujarPaises(); aplicarFiltros(); }
 
 async function iniciar() {
   mostrarEstado("Cargando…", "cargando");
@@ -521,6 +729,7 @@ $("alcance").addEventListener("click", ev => {
   document.querySelectorAll("#alcance button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
   estado.alcance = b.dataset.alcance;
   estado.pais = "";
+  dibujarTendencias();
   dibujarPaises();
   aplicarFiltros();
 });
@@ -528,7 +737,7 @@ $("alcance").addEventListener("click", ev => {
 let espera;
 $("buscador").addEventListener("input", ev => {
   clearTimeout(espera);
-  espera = setTimeout(() => { estado.q = ev.target.value.trim(); aplicarFiltros(); }, 200);
+  espera = setTimeout(() => { estado.q = ev.target.value.trim(); dibujarTendencias(); aplicarFiltros(); }, 200);
 });
 
 function avisar(texto) {

@@ -22,6 +22,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import recolector as rec
+import analisis
 import traductor
 
 PAIS_LOCAL = "AR"      # tu país: define qué es "Cerca" en la pantalla
@@ -54,7 +55,8 @@ def exportar(con, local: bool = False) -> dict:
         if f["id"] in ids_usados:
             fuentes[f["id"]] = len(fuentes)    # índice compacto dentro del JSON
     lista_fuentes = [
-        {k: f[k] for k in ("nombre", "pais", "region", "idioma", "categoria")}
+        {**{k: f[k] for k in ("nombre", "pais", "region", "idioma", "categoria")},
+         **({"pago": 1} if f["pago"] else {})}
         for f in con.execute("SELECT * FROM fuentes ORDER BY id") if f["id"] in fuentes
     ]
 
@@ -75,8 +77,11 @@ def exportar(con, local: bool = False) -> dict:
             art["il"] = f["idioma_tr"]
         articulos.append(art)
 
+    generado = rec.ahora_utc()
+    analisis.agrupar(articulos, lista_fuentes)          # "la misma noticia en varios medios"
     return {
-        "generado": rec.ahora_utc(),
+        "generado": generado,
+        "tendencias": analisis.tendencias(articulos, lista_fuentes, generado),
         "pais_local": PAIS_LOCAL,
         "local": local,          # True cuando lo sirve servidor.py en la notebook
         "fuentes": lista_fuentes,
