@@ -6,6 +6,7 @@ name: Actualizar noticias
 on:
   schedule:
     - cron: "7,37 * * * *"   # minutos 7 y 37 de cada hora (UTC); evita la congestión de la hora en punto
+    - cron: "23 12 1 * *"    # día 1 de cada mes: registra actividad (ver "mantener-activo")
   workflow_dispatch:          # permite correrlo a mano desde la pestaña "Actions"
   push:
     branches: [main]          # y cada vez que cambies algún archivo del repositorio
@@ -63,3 +64,22 @@ jobs:
       - name: Publicar
         id: publicar
         uses: actions/deploy-pages@v4
+
+  # GitHub pausa las tareas programadas de los repositorios que pasan 60 días
+  # sin cambios. Una vez por mes este paso actualiza un archivo de control,
+  # así el repositorio figura como activo y la app nunca deja de actualizarse.
+  mantener-activo:
+    if: github.event.schedule == '23 12 1 * *'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Registrar actividad mensual
+        run: |
+          date -u +"Ultima actividad automatica: %Y-%m-%d %H:%M UTC" > actividad.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add actividad.txt
+          git commit -m "Actividad mensual automática" || echo "Sin cambios"
+          git push
