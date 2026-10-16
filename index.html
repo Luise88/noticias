@@ -9,7 +9,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icono-192.png">
 <link rel="apple-touch-icon" href="icono-apple.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="NOW">
+<meta name="apple-mobile-web-app-title" content="Now">
 <title>Titulares del mundo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -440,10 +440,33 @@ function revisarFinal() {
   if (cerca && estado.mostrados < estado.filtrados.length) mostrarMas();
 }
 
+// Orden: siempre cronológico, igual para todos. No se usa nada de lo que leíste o tocaste.
+// Única regla, para que un medio que publica muchas notas juntas no tape a los demás:
+// las noticias se agrupan por hora y, dentro de cada hora, se reparten por turnos
+// entre los medios (una de cada medio, luego la siguiente de cada uno, etc.).
+function intercalar(lista) {
+  const orden = lista.slice().sort((x, y) => (y.p > x.p) - (y.p < x.p));
+  const HORA = 3600 * 1000;
+  const salida = [];
+  let i = 0;
+  while (i < orden.length) {
+    const tope = new Date(orden[i].p) - HORA;           // bloque de una hora
+    const porMedio = new Map();
+    while (i < orden.length && new Date(orden[i].p) > tope) {
+      const k = orden[i].fuente.nombre;
+      if (!porMedio.has(k)) porMedio.set(k, []);
+      porMedio.get(k).push(orden[i++]);
+    }
+    const colas = [...porMedio.values()];
+    while (colas.some(c => c.length)) colas.forEach(c => { if (c.length) salida.push(c.shift()); });
+  }
+  return salida;
+}
+
 function aplicarFiltros() {
   const q = normalizar(estado.q);
-  estado.filtrados = datos.articulos.filter(a =>
-    enAlcance(a) && (!estado.pais || a.fuente.pais === estado.pais) && (!q || a.busq.includes(q)));
+  estado.filtrados = intercalar(datos.articulos.filter(a =>
+    enAlcance(a) && (!estado.pais || a.fuente.pais === estado.pais) && (!q || a.busq.includes(q))));
   estado.mostrados = 0;
   $("lista").innerHTML = "";
   mostrarMas();

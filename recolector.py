@@ -28,7 +28,7 @@ import socket
 import sqlite3
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import parse_qsl, urlencode, urljoin, urlsplit, urlunsplit
 from urllib.request import Request, urlopen
@@ -111,6 +111,20 @@ def extraer_fecha(entrada) -> str | None:
         return datetime(*t[:6], tzinfo=timezone.utc).isoformat()
     except (TypeError, ValueError):
         return None
+
+
+def corregir_fecha(fecha: str | None, recolectado: str) -> str:
+    """Algunos medios (por ejemplo italianos) publican la hora local marcada como UTC,
+    y sus notas quedan "en el futuro" y siempre arriba de todo. Si una fecha es
+    posterior al momento de recolectarla, se le resta la diferencia horaria
+    (en horas enteras); nunca queda después de "ahora"."""
+    if not fecha:
+        return recolectado
+    f, r = datetime.fromisoformat(fecha), datetime.fromisoformat(recolectado)
+    if f > r:
+        horas = min(14, -int(-(f - r).total_seconds() // 3600))   # redondeo hacia arriba
+        f = f - timedelta(hours=horas)
+    return min(f, r).isoformat()
 
 
 ES_IMAGEN = re.compile(r"\.(jpe?g|png|webp|gif)(\?|$)", re.I)
@@ -277,7 +291,7 @@ def guardar(con: sqlite3.Connection, fuente: sqlite3.Row, feed) -> int:
             titulo,
             limpiar_texto(e.get("summary", ""), LARGO_RESUMEN),
             extraer_imagen(e),
-            extraer_fecha(e) or recolectado,
+            corregir_fecha(extraer_fecha(e), recolectado),
             recolectado,
             fuente["id"],
         ))

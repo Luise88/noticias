@@ -39,11 +39,12 @@ def exportar(con, local: bool = False) -> dict:
     traductor.preparar_db(con)
     desde = (datetime.now(timezone.utc) - timedelta(days=DIAS)).isoformat()
     filas = con.execute("""
-        SELECT a.titulo, a.resumen, a.url, a.imagen, a.publicado_utc, a.fuente_id,
+        SELECT a.titulo, a.resumen, a.url, a.imagen, a.fuente_id,
+               MIN(a.publicado_utc, a.recolectado_utc) AS publicado_utc,
                a.titulo_tr, a.resumen_tr, a.idioma_tr
         FROM articulos a JOIN fuentes f ON f.id = a.fuente_id
-        WHERE a.publicado_utc >= ? AND f.activa = 1
-        ORDER BY a.publicado_utc DESC, a.id DESC
+        WHERE MIN(a.publicado_utc, a.recolectado_utc) >= ? AND f.activa = 1
+        ORDER BY MIN(a.publicado_utc, a.recolectado_utc) DESC, a.id DESC
         LIMIT ?
     """, (desde, MAXIMO)).fetchall()
 
