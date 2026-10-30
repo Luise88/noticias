@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="icono-apple.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Now">
-<title>Titulares del mundo</title>
+<title>Now: titulares del mundo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -56,28 +56,37 @@
   /* ---------- cabecera ---------- */
   .cabecera {
     position: sticky; top: 0; z-index: 5;
-    background: var(--fondo);
+    background: color-mix(in srgb, var(--fondo) 88%, transparent);
+    -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--linea);
-    padding: calc(12px + env(safe-area-inset-top)) 16px 0;
+    padding: calc(10px + env(safe-area-inset-top)) 16px 0;
   }
   .barra {
-    max-width: 760px; margin: 0 auto;
-    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    max-width: 680px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
   }
-  h1 {
-    margin: 0;
-    font: 600 1.5rem/1.1 var(--serif);
-    letter-spacing: -0.01em;
-  }
-  .contador { margin: 2px 0 0; font-size: .8125rem; color: var(--tinta-suave); }
+  .marca { display: flex; align-items: center; gap: 9px; min-width: 0; }
+  .marca img { width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0; }
+  h1 { margin: 0; font: 600 1.75rem/1 var(--serif); letter-spacing: -0.02em; }
+  .herramientas { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
   .btn-actualizar {
-    flex-shrink: 0;
+    flex-shrink: 0; margin-right: 4px;
     border: 1px solid var(--linea); background: var(--superficie);
-    padding: 8px 14px; border-radius: 999px; font-size: .875rem; font-weight: 500;
+    padding: 6px 12px; border-radius: 999px; font-size: .8125rem; font-weight: 500;
   }
-  .btn-actualizar[disabled] { opacity: .6; cursor: progress; }
-  .botones { display: flex; flex-direction: column; align-items: stretch; gap: 6px; flex-shrink: 0; }
   .btn-actualizar[aria-pressed="true"] { background: var(--tinta); color: var(--fondo); border-color: var(--tinta); }
+  .btn-redondo {
+    display: inline-grid; place-items: center; width: 38px; height: 38px; flex-shrink: 0;
+    border: 0; border-radius: 50%; background: none; color: var(--tinta);
+  }
+  .btn-redondo:hover { background: var(--linea); }
+  .btn-redondo svg { width: 21px; height: 21px; }
+  .btn-redondo[disabled] { cursor: progress; }
+  .btn-redondo.girando svg { animation: girar .9s linear infinite; }
+  @keyframes girar { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .btn-redondo.girando svg { animation: none; opacity: .5; } }
+  .solo-lector { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .contador { margin: 0 0 8px; font-size: .8125rem; color: var(--tinta-suave); }
 
   /* ---------- pregunta de idioma al abrir una noticia ---------- */
   .dialogo {
@@ -100,7 +109,7 @@
 
   /* ---------- selector de alcance: la distancia como eje ---------- */
   .alcance {
-    max-width: 760px; margin: 14px auto 0 -10px;
+    max-width: 680px; margin: 8px auto 0 -10px;
     display: flex; gap: 0; overflow-x: auto; scrollbar-width: none;
   }
   .alcance::-webkit-scrollbar { display: none; }
@@ -129,7 +138,7 @@
 
   /* ---------- filtros secundarios ---------- */
   .filtros {
-    max-width: 760px; margin: 0 auto; padding: 12px 16px 0;
+    max-width: 680px; margin: 0 auto; padding: 12px 16px 4px;
   }
   .buscador {
     width: 100%; padding: 10px 14px; border-radius: 10px;
@@ -153,52 +162,84 @@
   }
   .paises button[aria-pressed="true"] span { color: inherit; opacity: .7; }
 
-  /* ---------- lista de titulares ---------- */
-  main { max-width: 760px; margin: 0 auto; padding: 4px 16px 48px; }
-  .lista { list-style: none; margin: 0; padding: 0; }
-  .nota { border-bottom: 1px solid var(--linea); }
-  .nota > a {
-    display: grid; grid-template-columns: 1fr auto; gap: 14px;
-    padding: 16px 0; color: inherit; text-decoration: none;
+  /* ---------- tarjetas de noticias ---------- */
+  main { max-width: 680px; margin: 0 auto; padding: 8px 12px 48px; }
+  .lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  .nota {
+    background: var(--superficie); border-radius: 18px; overflow: hidden;
+    border: 1px solid var(--linea);
   }
-  .nota > a { padding-bottom: 6px; }
-  /* fila de acciones debajo de cada nota */
-  .acciones {
-    display: flex; align-items: center; gap: 6px 10px; flex-wrap: wrap;
-    padding: 0 0 10px; font-size: .8125rem; color: var(--tinta-suave);
+  @media (prefers-color-scheme: dark) { .nota { border-color: transparent; } }
+  .nota > a { display: block; color: inherit; text-decoration: none; }
+  .portada {
+    display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover;
+    background: var(--linea);
   }
-  .acciones .nota-trad { margin-right: auto; }
-  .acciones .espacio { margin-left: auto; }
-  .btn-grupo {
-    display: inline-flex; align-items: center; gap: 6px; margin-right: auto;
-    border: 1px solid var(--linea); background: var(--superficie); color: var(--tinta);
-    border-radius: 999px; padding: 4px 10px; font-size: .8125rem; font-weight: 500;
+  .cuerpo { padding: 14px 16px 2px; }
+  .titular {
+    margin: 0; font: 600 1.3125rem/1.24 var(--serif);
+    letter-spacing: -0.01em; overflow-wrap: anywhere; text-wrap: pretty;
   }
-  .btn-grupo svg { width: 12px; height: 12px; transition: transform .15s; }
-  .btn-grupo[aria-expanded="true"] svg { transform: rotate(180deg); }
+  .nota > a:hover .titular { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+  .resumen {
+    margin: 6px 0 0; font-size: .875rem; line-height: 1.45; color: var(--tinta-suave);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  /* foto chica del medio: miniatura al costado en lugar de estirarla */
+  .nota.compacta > a { display: grid; grid-template-columns: 1fr 92px; gap: 12px; padding: 14px 16px 2px; }
+  .nota.compacta .cuerpo { padding: 0; }
+  .nota.compacta .portada { grid-column: 2; grid-row: 1; width: 92px; height: 92px; aspect-ratio: auto; border-radius: 12px; }
+  @media (min-width: 640px) {
+    .titular { font-size: 1.5rem; }
+    .nota.compacta > a { grid-template-columns: 1fr 140px; }
+    .nota.compacta .portada { width: 140px; height: 100px; }
+  }
+  /* pie: medio, hora y acciones */
+  .pie { display: flex; align-items: center; gap: 6px; padding: 6px 6px 8px 16px; }
+  .pie .meta { flex: 1; min-width: 0; margin: 0; }
+  .meta {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 4px 7px;
+    font-size: .8125rem; color: var(--tinta-suave);
+  }
+  .meta .logo { width: 18px; height: 18px; border-radius: 50%; background: #fff; flex-shrink: 0; object-fit: contain; }
+  .meta .medio { color: var(--tinta); font-weight: 600; }
+  .bandera { font-size: .9375rem; line-height: 1; }
+  .idioma, .etiqueta-trad {
+    border: 1px solid var(--linea); border-radius: 5px; padding: 0 5px;
+    font-size: .6875rem; font-weight: 600; letter-spacing: .02em;
+  }
+  .etiqueta-trad { border-color: transparent; background: color-mix(in srgb, var(--oceano) 14%, transparent); color: var(--oceano); }
+  .candado { display: inline-flex; color: var(--tinta-suave); }
+  .candado svg { width: 12px; height: 12px; }
   .btn-icono {
-    display: inline-grid; place-items: center; width: 34px; height: 34px;
+    display: inline-grid; place-items: center; width: 38px; height: 38px; flex-shrink: 0;
     border: 0; background: none; color: var(--tinta-suave); border-radius: 50%;
   }
   .btn-icono:hover { background: var(--linea); color: var(--tinta); }
-  .btn-icono svg { width: 19px; height: 19px; }
+  .btn-icono svg { width: 20px; height: 20px; }
   .btn-icono[aria-pressed="true"] { color: var(--oceano); }
+  /* la misma noticia en otros medios */
+  .grupo-fila { padding: 8px 16px 0; }
+  .btn-grupo {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 0; background: color-mix(in srgb, var(--senal) 22%, transparent); color: var(--tinta);
+    border-radius: 999px; padding: 5px 12px; font-size: .8125rem; font-weight: 600;
+  }
+  .btn-grupo svg { width: 12px; height: 12px; transition: transform .15s; }
+  .btn-grupo[aria-expanded="true"] svg { transform: rotate(180deg); }
   @media (prefers-reduced-motion: reduce) { .btn-grupo svg { transition: none; } }
-  /* otros medios que cubren la misma noticia */
   .grupo-lista {
-    list-style: none; margin: 0 0 14px; padding: 4px 0 4px 12px;
+    list-style: none; margin: 10px 16px 4px; padding: 2px 0 2px 12px;
     border-left: 3px solid var(--senal);
   }
-  .grupo-lista li + li { margin-top: 10px; }
+  .grupo-lista li + li { margin-top: 12px; }
   .grupo-lista a { display: block; color: inherit; text-decoration: none; }
-  .grupo-lista .meta { margin-bottom: 2px; }
-  .grupo-lista .titulo-otro { font: 600 1rem/1.3 var(--serif); }
+  .grupo-lista .meta { margin-bottom: 3px; }
+  .grupo-lista .titulo-otro { font: 600 1.0625rem/1.3 var(--serif); }
   .grupo-lista a:hover .titulo-otro { text-decoration: underline; text-underline-offset: 3px; }
   /* notas ya abiertas */
-  .nota.leida .titular, .grupo-lista .leida .titulo-otro { color: var(--tinta-suave); font-weight: 500; }
-  .nota.leida .foto { opacity: .65; }
-  .candado { display: inline-flex; color: var(--tinta-suave); }
-  .candado svg { width: 12px; height: 12px; }
+  .nota.leida .titular, .grupo-lista .leida .titulo-otro { color: var(--tinta-suave); }
+  .nota.leida .portada { opacity: .6; }
   /* tendencias */
   .tendencias { display: flex; gap: 6px; overflow-x: auto; padding: 10px 0 0; scrollbar-width: none; }
   .tendencias::-webkit-scrollbar { display: none; }
@@ -210,43 +251,7 @@
   .tendencias button span { color: var(--tinta-suave); font-weight: 400; font-variant-numeric: tabular-nums; }
   .tendencias button[aria-pressed="true"] { background: var(--senal); color: #14243A; }
   .tendencias button[aria-pressed="true"] span { color: inherit; opacity: .75; }
-  .nota > a:hover .titular { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
-  .meta {
-    display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px;
-    font-size: .8125rem; color: var(--tinta-suave); margin-bottom: 4px;
-  }
-  .meta .medio { color: var(--tinta); font-weight: 600; }
-  .bandera { font-size: 1rem; line-height: 1; }
-  .idioma {
-    border: 1px solid var(--linea); border-radius: 4px; padding: 0 4px;
-    font-size: .6875rem; font-weight: 600; letter-spacing: .02em;
-  }
-  .titular {
-    margin: 0; font: 600 1.1875rem/1.28 var(--serif);
-    letter-spacing: -0.005em; overflow-wrap: anywhere;
-  }
-  .resumen {
-    margin: 6px 0 0; font-size: .875rem; color: var(--tinta-suave);
-    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-  }
-  .foto {
-    width: 92px; height: 92px; border-radius: 8px; object-fit: cover;
-    background: var(--linea); align-self: start;
-  }
   @media (min-width: 800px) { .alcance { margin-left: auto; } }
-  @media (min-width: 640px) {
-    .foto { width: 148px; height: 104px; }
-    .titular { font-size: 1.3125rem; }
-  }
-
-  /* ---------- accesos a Ajustes y Panel ---------- */
-  .extras { display: flex; gap: 6px; margin-top: 8px; }
-  .extras button {
-    display: inline-flex; align-items: center; gap: 5px;
-    border: 1px solid var(--linea); background: none; color: var(--tinta-suave);
-    border-radius: 999px; padding: 3px 10px 3px 8px; font-size: .8125rem;
-  }
-  .extras svg { width: 15px; height: 15px; }
 
   /* ---------- hojas a pantalla completa (Ajustes, Panel) ---------- */
   .hoja {
@@ -332,18 +337,23 @@
 
 <header class="cabecera">
   <div class="barra">
-    <div>
-      <h1>Titulares del mundo</h1>
-      <p class="contador" id="contador">&nbsp;</p>
-      <div class="extras">
-        <button type="button" id="btnAjustes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="17" r="2" fill="none" stroke="currentColor" stroke-width="2"/></svg>Ajustes</button>
-        <button type="button" id="btnPanel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V11M12 20V5M19 20v-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>Panel</button>
-      </div>
+    <div class="marca">
+      <img src="icono-192.png" alt="">
+      <h1>Now</h1>
     </div>
-    <div class="botones">
-      <button class="btn-actualizar" id="btnActualizar" type="button">Actualizar</button>
+    <div class="herramientas">
       <button class="btn-actualizar" id="btnTraducir" type="button" aria-pressed="false"
               title="Mostrar en castellano los titulares que están en inglés">Traducir</button>
+      <button class="btn-redondo" id="btnActualizar" type="button" title="Actualizar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="solo-lector" id="lblActualizar">Actualizar</span>
+      </button>
+      <button class="btn-redondo" id="btnPanel" type="button" title="Panel de cobertura" aria-label="Panel de cobertura">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V11M12 20V5M19 20v-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+      </button>
+      <button class="btn-redondo" id="btnAjustes" type="button" title="Ajustes" aria-label="Ajustes">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="17" r="2" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
     </div>
   </div>
   <nav class="alcance" id="alcance" aria-label="Alcance de las noticias">
@@ -358,6 +368,7 @@
 </header>
 
 <div class="filtros">
+  <p class="contador" id="contador">&nbsp;</p>
   <input class="buscador" id="buscador" type="search" placeholder="Buscar en los titulares" aria-label="Buscar en los titulares" autocomplete="off">
   <div class="tendencias" id="tendencias" role="group" aria-label="Temas del momento" hidden></div>
   <div class="paises" id="paises" role="group" aria-label="Filtrar por país"></div>
@@ -484,7 +495,7 @@ async function cargarDatos() {
     if (!datos.grupos.has(a.g)) datos.grupos.set(a.g, []);
     datos.grupos.get(a.g).push(a);
   });
-  $("btnActualizar").textContent = datos.local ? "Buscar nuevas" : "Actualizar";
+  $("lblActualizar").textContent = $("btnActualizar").title = datos.local ? "Buscar nuevas" : "Actualizar";
 }
 
 function enAlcance(a, alcance = estado.alcance) {
@@ -573,15 +584,28 @@ function abrirNota(ev, n) {
   }
 }
 
+// logo de cada medio (el ícono de su sitio); si no carga, queda solo la bandera
+function logoMedio(url) {
+  try { return `https://www.google.com/s2/favicons?sz=64&domain=${new URL(url).hostname}`; } catch { return ""; }
+}
+
 function crearMeta(n) {
   const meta = document.createElement("div");
   meta.className = "meta";
+  const src = logoMedio(n.u);
+  if (src) {
+    const logo = document.createElement("img");
+    logo.className = "logo"; logo.src = src; logo.alt = ""; logo.loading = "lazy";
+    logo.referrerPolicy = "no-referrer";
+    logo.onerror = () => logo.remove();
+    meta.appendChild(logo);
+  }
+  const medio = document.createElement("span");
+  medio.className = "medio"; medio.textContent = n.fuente.nombre;
   const bnd = document.createElement("span");
   bnd.className = "bandera"; bnd.textContent = bandera(n.fuente.pais);
   bnd.title = nombrePais(n.fuente.pais); bnd.setAttribute("aria-label", bnd.title);
-  const medio = document.createElement("span");
-  medio.className = "medio"; medio.textContent = n.fuente.nombre;
-  meta.append(bnd, medio);
+  meta.append(medio, bnd);
   if (n.fuente.pago) {
     const c = document.createElement("span");
     c.className = "candado"; c.innerHTML = ICONOS.candado;
@@ -594,9 +618,13 @@ function crearMeta(n) {
   t.title = new Date(n.p).toLocaleString("es-AR");
   meta.appendChild(t);
   if (n.fuente.idioma && n.fuente.idioma !== "es") {
+    const traducida = mostrarTraducida(n);
     const idi = document.createElement("span");
-    idi.className = "idioma"; idi.textContent = n.fuente.idioma.toUpperCase();
-    idi.title = "Idioma del artículo";
+    idi.className = traducida ? "etiqueta-trad" : "idioma";
+    idi.textContent = traducida ? `Traducido del ${n.fuente.idioma.toUpperCase()}` : n.fuente.idioma.toUpperCase();
+    idi.title = traducida
+      ? `Traducido del ${NOMBRES_IDIOMA[n.fuente.idioma] || n.fuente.idioma}. Original: ${n.t}`
+      : "Idioma del artículo";
     meta.appendChild(idi);
   }
   return meta;
@@ -608,36 +636,43 @@ function crearNota(n, grupo = null) {
   li.dataset.url = n.u;
   if (leidas.has(n.u)) li.classList.add("leida");
   const traducida = mostrarTraducida(n);
+
   const a = document.createElement("a");
   a.href = n.u; a.target = "_blank"; a.rel = "noopener noreferrer";
   a.addEventListener("click", ev => abrirNota(ev, n));
-
-  const texto = document.createElement("div");
+  if (n.i) {
+    const img = document.createElement("img");
+    img.className = "portada"; img.src = n.i; img.alt = "";
+    img.loading = "lazy"; img.decoding = "async"; img.referrerPolicy = "no-referrer";
+    // si el medio manda una foto chica, mostrarla como miniatura y no estirada
+    const revisar = () => { if (img.naturalWidth && img.naturalWidth < 400) li.classList.add("compacta"); };
+    img.onload = revisar;
+    img.onerror = () => { img.remove(); li.classList.remove("compacta"); };
+    if (img.complete) revisar();
+    a.appendChild(img);
+  }
+  const cuerpo = document.createElement("div");
+  cuerpo.className = "cuerpo";
   const h = document.createElement("h2");
   h.className = "titular"; h.textContent = traducida ? n.tt : n.t;
-  if (traducida) { h.lang = n.il || "es"; h.title = n.t; }
-  texto.append(crearMeta(n), h);
+  if (traducida) h.lang = n.il || "es";
+  cuerpo.appendChild(h);
   const resumen = traducida ? (n.tr || "") : n.r;
   if (resumen) {
     const p = document.createElement("p");
     p.className = "resumen"; p.textContent = resumen;
-    texto.appendChild(p);
+    cuerpo.appendChild(p);
   }
-  a.appendChild(texto);
-  if (n.i) {
-    const img = document.createElement("img");
-    img.className = "foto"; img.src = n.i; img.alt = "";
-    img.loading = "lazy"; img.decoding = "async"; img.referrerPolicy = "no-referrer";
-    img.onerror = () => img.remove();
-    a.appendChild(img);
-  }
+  a.appendChild(cuerpo);
   li.appendChild(a);
 
-  // ---- fila de acciones
-  const acciones = document.createElement("div");
-  acciones.className = "acciones";
+  // ---- la misma noticia en otros medios
+  const pie = document.createElement("div");
+  pie.className = "pie";
   const otros = grupo ? grupo.filter(x => x !== n) : [];
   if (otros.length) {
+    const fila = document.createElement("div");
+    fila.className = "grupo-fila";
     const medios = new Set(grupo.map(x => x.fuente.nombre)).size;
     const paises = new Set(grupo.map(x => x.fuente.pais)).size;
     const b = document.createElement("button");
@@ -650,18 +685,14 @@ function crearNota(n, grupo = null) {
     b.addEventListener("click", () => {
       const abrir = b.getAttribute("aria-expanded") !== "true";
       b.setAttribute("aria-expanded", String(abrir));
-      if (abrir) { lista = crearListaGrupo(otros); li.appendChild(lista); }
+      if (abrir) { lista = crearListaGrupo(otros); li.insertBefore(lista, pie); }
       else if (lista) { lista.remove(); lista = null; }
     });
-    acciones.appendChild(b);
-  } else if (traducida) {
-    const nt = document.createElement("span");
-    nt.className = "nota-trad";
-    nt.textContent = `Traducido del ${NOMBRES_IDIOMA[n.fuente.idioma] || n.fuente.idioma.toUpperCase()}`;
-    acciones.appendChild(nt);
-  } else {
-    const esp = document.createElement("span"); esp.className = "espacio"; acciones.appendChild(esp);
+    fila.appendChild(b);
+    li.appendChild(fila);
   }
+
+  // ---- pie: medio, hora, guardar y compartir
   const bg = document.createElement("button");
   bg.type = "button"; bg.className = "btn-icono";
   const si = estaGuardada(n);
@@ -673,8 +704,8 @@ function crearNota(n, grupo = null) {
   bc.type = "button"; bc.className = "btn-icono"; bc.innerHTML = ICONOS.compartir;
   bc.setAttribute("aria-label", "Compartir");
   bc.addEventListener("click", () => compartir(n));
-  acciones.append(bg, bc);
-  li.appendChild(acciones);
+  pie.append(crearMeta(n), bg, bc);
+  li.appendChild(pie);
   return li;
 }
 
@@ -727,7 +758,7 @@ function mostrarMas() {
       ? `<strong>Sin resultados para “${q}”</strong>Probá con otra palabra o elegí “Todo”.`
       : estado.alcance === "guardadas"
         ? `<strong>Todavía no guardaste noticias</strong>Tocá el ícono de marcador en cualquier nota para leerla después. Quedan guardadas en este teléfono.`
-        : `<strong>No hay noticias en esta sección</strong>Tocá “${$("btnActualizar").textContent}” para traer las últimas.`);
+        : `<strong>No hay noticias en esta sección</strong>Tocá el botón de actualizar (arriba) para traer las últimas.`);
   } else {
     mostrarEstado(estado.mostrados >= estado.filtrados.length ? "Llegaste al final." : "", "cargando");
   }
@@ -894,8 +925,8 @@ dibujarBotonTraducir();
 
 $("btnActualizar").addEventListener("click", async () => {
   const b = $("btnActualizar");
-  const etiqueta = b.textContent;
-  b.disabled = true; b.textContent = datos.local ? "Buscando…" : "Actualizando…";
+  b.disabled = true; b.classList.add("girando");
+  $("lblActualizar").textContent = datos.local ? "Buscando…" : "Actualizando…";
   try {
     const antes = datos.articulos.length ? datos.articulos[0].p : "";
     if (datos.local) {
@@ -909,8 +940,8 @@ $("btnActualizar").addEventListener("click", async () => {
   } catch (e) {
     avisar(e.message || "No se pudo actualizar");
   } finally {
-    b.disabled = false; b.textContent = datos.local ? "Buscar nuevas" : "Actualizar";
-    if (!b.textContent) b.textContent = etiqueta;
+    b.disabled = false; b.classList.remove("girando");
+    $("lblActualizar").textContent = datos.local ? "Buscar nuevas" : "Actualizar";
   }
 });
 
